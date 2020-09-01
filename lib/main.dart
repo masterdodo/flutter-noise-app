@@ -40,6 +40,10 @@ class _NoiseMainState extends State<NoiseMain> {
   final player = AudioCache();
   Timer timer;
   int lastTimeBell = 0;
+  double _currentDbValue = 70;
+  double _currentPerSecValue = 1;
+  double _currentTimeSampleValue = 60;
+  double activeDbValue, activePerSecValue, activeTimeSampleValue;
 
   @override
   void initState() {
@@ -61,14 +65,21 @@ class _NoiseMainState extends State<NoiseMain> {
     this.changeText(noiseReading.meanDecibel.toString());
   }
 
+  //Turn MIC on
   void start() async {
     try {
       _noiseSubscription = _noiseMeter.noiseStream.listen(onData);
+      setState(() {
+        activeDbValue = _currentDbValue;
+        activePerSecValue = _currentPerSecValue;
+        activeTimeSampleValue = _currentTimeSampleValue;
+      });
     } catch (err) {
       print(err);
     }
   }
 
+  //Turn MIC off
   void stop() async {
     try {
       if (_noiseSubscription != null) {
@@ -94,11 +105,121 @@ class _NoiseMainState extends State<NoiseMain> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text(this.text),
+        child: Column(children: [
+          dBTresholdSliderControl(30, 150),
+          perSecSliderControl(0.1, 1),
+          timeSampleSliderControl(5, 600)
         ]),
       ),
       floatingActionButton: buildActionMicButton(),
+    );
+  }
+
+  Row dBTresholdSliderControl(double minVal, double maxVal) {
+    return Row(
+      children: [
+        Flexible(
+          child: Slider(
+              min: minVal,
+              max: maxVal,
+              value: _currentDbValue,
+              label: _currentDbValue.round().toString(),
+              onChanged: (double val) {
+                setState(() {
+                  _currentDbValue = val;
+                });
+              }),
+        ),
+        Container(
+          width: 30,
+          child: TextField(
+            controller:
+                TextEditingController(text: _currentDbValue.round().toString()),
+            decoration:
+                InputDecoration(border: InputBorder.none, hintText: 'dB'),
+            onChanged: (String text) {
+              if (double.parse(text) >= minVal &&
+                  double.parse(text) <= maxVal) {
+                setState(() {
+                  _currentDbValue = double.parse(text);
+                });
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Row perSecSliderControl(double minVal, double maxVal) {
+    return Row(
+      children: [
+        Flexible(
+          child: Slider(
+              min: minVal,
+              max: maxVal,
+              value: _currentPerSecValue,
+              label: _currentPerSecValue.toStringAsFixed(2),
+              onChanged: (double val) {
+                setState(() {
+                  _currentPerSecValue = val;
+                });
+              }),
+        ),
+        Container(
+          width: 30,
+          child: TextField(
+            controller: TextEditingController(
+                text: _currentPerSecValue.toStringAsFixed(2)),
+            decoration:
+                InputDecoration(border: InputBorder.none, hintText: 'dB'),
+            onChanged: (String text) {
+              if (double.parse(text) >= minVal &&
+                  double.parse(text) <= maxVal) {
+                setState(() {
+                  _currentPerSecValue = double.parse(text);
+                });
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Row timeSampleSliderControl(double minVal, double maxVal) {
+    return Row(
+      children: [
+        Flexible(
+          child: Slider(
+              min: minVal,
+              max: maxVal,
+              value: _currentTimeSampleValue,
+              label: _currentTimeSampleValue.round().toString(),
+              onChanged: (double val) {
+                setState(() {
+                  _currentTimeSampleValue = val;
+                });
+              }),
+        ),
+        Container(
+          width: 30,
+          child: TextField(
+            controller: TextEditingController(
+                text: _currentTimeSampleValue.round().toString()),
+            decoration:
+                InputDecoration(border: InputBorder.none, hintText: 'dB'),
+            onChanged: (String text) {
+              if (double.parse(text) >= minVal &&
+                  double.parse(text) <= maxVal) {
+                setState(() {
+                  _currentTimeSampleValue = double.parse(text);
+                });
+              }
+            },
+          ),
+        ),
+      ],
     );
   }
 
