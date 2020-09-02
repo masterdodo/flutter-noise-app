@@ -27,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   double _currentTimeSampleValue = 60;
   double activeDbValue, activePerSecValue, activeTimeSampleValue;
   String _currentAudioName = "Choose audio file...";
+  List<double> dBValueList;
 
   @override
   void initState() {
@@ -60,6 +61,9 @@ class _HomeScreenState extends State<HomeScreen> {
         activeTimeSampleValue = _currentTimeSampleValue;
         activeAudioFile = absAudioPath;
       });
+      double arrLengthDouble = (1 / activePerSecValue) * activeTimeSampleValue;
+      int arrLength = arrLengthDouble.round();
+      dBValueList = new List(arrLength);
     } catch (err) {
       print(err);
     }
