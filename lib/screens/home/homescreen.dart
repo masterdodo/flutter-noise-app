@@ -1,5 +1,7 @@
 import 'package:noise_meter/noise_meter.dart';
 import 'package:audioplayers/audio_cache.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -16,16 +18,20 @@ class _HomeScreenState extends State<HomeScreen> {
   String text = "";
   Color bgColor = Colors.white;
   final player = AudioCache();
+  AudioPlayer audioPlayer;
   Timer timer;
   int lastTimeBell = 0;
+  String absAudioPath, activeAudioFile;
   double _currentDbValue = 70;
   double _currentPerSecValue = 1;
   double _currentTimeSampleValue = 60;
   double activeDbValue, activePerSecValue, activeTimeSampleValue;
+  String _currentAudioName = "Choose audio file...";
 
   @override
   void initState() {
     super.initState();
+    audioPlayer = AudioPlayer();
   }
 
   @override
@@ -34,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
     controller.dispose();
   }
 
+  //Listens to MIC(gets decibel data)
   void onData(NoiseReading noiseReading) {
     this.setState(() {
       if (!this._isRecording) {
@@ -51,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
         activeDbValue = _currentDbValue;
         activePerSecValue = _currentPerSecValue;
         activeTimeSampleValue = _currentTimeSampleValue;
+        activeAudioFile = absAudioPath;
       });
     } catch (err) {
       print(err);
@@ -64,6 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _noiseSubscription.cancel();
         _noiseSubscription = null;
       }
+      stopAudio();
       this.setState(() {
         this._isRecording = false;
         this.bgColor = Colors.white;
@@ -72,6 +81,22 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (err) {
       print('stopRecorder error: $err');
     }
+  }
+
+  void openAudioPicker() async {
+    String path = await FilePicker.getFilePath(type: FileType.audio);
+    setState(() {
+      absAudioPath = path;
+      _currentAudioName = path.split("/")[path.split("/").length - 1];
+    });
+  }
+
+  void playAudio() async {
+    await audioPlayer.play(activeAudioFile, isLocal: true);
+  }
+
+  void stopAudio() async {
+    await audioPlayer.stop();
   }
 
   @override
@@ -86,7 +111,24 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(children: [
           dBTresholdSliderControl(30, 150),
           perSecSliderControl(0.1, 1),
-          timeSampleSliderControl(5, 600)
+          timeSampleSliderControl(5, 600),
+          Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                child: IconButton(
+                  icon: Icon(Icons.file_upload),
+                  onPressed: () => openAudioPicker(),
+                ),
+              ),
+              Flexible(
+                child: GestureDetector(
+                    onTap: () => openAudioPicker(),
+                    child: Text(this._currentAudioName)),
+              ),
+            ],
+          )
         ]),
       ),
       floatingActionButton: buildActionMicButton(),
@@ -210,14 +252,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void changeText(text) {
     var db = double.parse(text);
-    if (db < 40) {
-      bgColor = Colors.green[300];
-    } else if (db > 40 && db < 75) {
-      bgColor = Colors.orange[300];
-    } else if (db > 75) {
+    if (db > activeDbValue) {
       bgColor = Colors.red[300];
       if (currentTimeInSeconds() > lastTimeBell + 3) {
-        player.play('audio/bell1.mp3');
+        playAudio();
         lastTimeBell = currentTimeInSeconds();
       }
     }
