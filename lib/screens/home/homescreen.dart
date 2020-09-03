@@ -1,5 +1,4 @@
 import 'package:noise_meter/noise_meter.dart';
-import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -11,28 +10,44 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool _isRecording = false;
-  StreamSubscription<NoiseReading> _noiseSubscription;
-  NoiseMeter _noiseMeter = new NoiseMeter();
-  final controller = TextEditingController();
-  String text = "";
-  Color bgColor = Colors.white;
-  final player = AudioCache();
-  AudioPlayer audioPlayer;
-  Timer timer;
-  int lastTimeBell = 0;
+  bool _isRecording; //mic button recording on or off
+  StreamSubscription<NoiseReading>
+      _noiseSubscription; //getting dB values from mic
+  NoiseMeter _noiseMeter; //getting dB values from mic
+  AudioPlayer audioPlayer; //audio alert player
+
+  final controller = TextEditingController(); //text controller
+  Timer timer; //timer used for persec dB checks
+
+  Color _bgColor = Colors.white; //default bg color of app
+  // absolute path of current audio file, selected audio file after recording started
   String absAudioPath, activeAudioFile;
-  double _currentDbValue = 70;
-  double _currentPerSecValue = 1;
-  double _currentTimeSampleValue = 60;
-  double activeDbValue, activePerSecValue, activeTimeSampleValue;
-  String _currentAudioName = "Choose audio file...";
-  List<double> dBValueList;
+  // _current - realtime values of sliders, active - values after recoding started
+  double _currentDbValue,
+      _currentPerSecValue,
+      _currentTimeSampleValue,
+      activeDbValue,
+      activePerSecValue,
+      activeTimeSampleValue;
+
+  String _currentAudioName =
+      "Choose audio file..."; //current audio name(without path)
+
+  String _dBValueRealTime; //realtime dB value when recording
+
+  List<double> dBValueList; //array of realtime values for chosen time frame
+  int arrLength; //length of array based on time frame and persec value
 
   @override
   void initState() {
     super.initState();
     audioPlayer = AudioPlayer();
+    _noiseMeter = new NoiseMeter();
+    _isRecording = false;
+    _currentDbValue = 70;
+    _currentPerSecValue = 1;
+    _currentTimeSampleValue = 60;
+    arrLength = 0;
   }
 
   @override
@@ -41,14 +56,25 @@ class _HomeScreenState extends State<HomeScreen> {
     controller.dispose();
   }
 
+  //Sets a timer of how often to write dB value to array based on chosen persec value
+  void getdBData() {
+    setState(() {
+      timer = Timer.periodic(
+          Duration(milliseconds: (activePerSecValue * 1000).round()),
+          (Timer t) {
+        dBProcessor(_dBValueRealTime);
+      });
+    });
+  }
+
   //Listens to MIC(gets decibel data)
   void onData(NoiseReading noiseReading) {
     this.setState(() {
       if (!this._isRecording) {
-        this._isRecording = true;
+        _isRecording = true;
       }
+      _dBValueRealTime = noiseReading.meanDecibel.toString();
     });
-    this.changeText(noiseReading.meanDecibel.toString());
   }
 
   //Turn MIC on
@@ -56,14 +82,15 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       _noiseSubscription = _noiseMeter.noiseStream.listen(onData);
       setState(() {
+        //Sets active values from sliders and calculates the length of an array
         activeDbValue = _currentDbValue;
         activePerSecValue = _currentPerSecValue;
         activeTimeSampleValue = _currentTimeSampleValue;
         activeAudioFile = absAudioPath;
+        arrLength = ((1.0 / activePerSecValue) * activeTimeSampleValue).floor();
+        dBValueList = new List<double>();
       });
-      double arrLengthDouble = (1 / activePerSecValue) * activeTimeSampleValue;
-      int arrLength = arrLengthDouble.round();
-      dBValueList = new List(arrLength);
+      getdBData(); //Calls function to start persec timer
     } catch (err) {
       print(err);
     }
@@ -73,20 +100,21 @@ class _HomeScreenState extends State<HomeScreen> {
   void stop() async {
     try {
       if (_noiseSubscription != null) {
-        _noiseSubscription.cancel();
+        _noiseSubscription.cancel(); //Cancels MIC
         _noiseSubscription = null;
       }
-      stopAudio();
+      timer.cancel(); //Stops timer that's adding dB values to array
+      stopAudio(); //Stops audio alert if playing
+      dBValueList.clear(); //Clears/Resets array of realtime dB values
       this.setState(() {
         this._isRecording = false;
-        this.bgColor = Colors.white;
-        this.text = "";
       });
     } catch (err) {
       print('stopRecorder error: $err');
     }
   }
 
+  //Used to choose audio file, then sets the path of file and gets just the name of the file
   void openAudioPicker() async {
     String path = await FilePicker.getFilePath(type: FileType.audio);
     setState(() {
@@ -95,10 +123,12 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  //Play audio file
   void playAudio() async {
     await audioPlayer.play(activeAudioFile, isLocal: true);
   }
 
+  //Stops audio file
   void stopAudio() async {
     await audioPlayer.stop();
   }
@@ -106,39 +136,49 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: _bgColor,
       appBar: AppBar(
         title: Text("Noise App"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(children: [
+          Text("dB Treshold"),
           dBTresholdSliderControl(30, 150),
+          Text("Check For Value Per Second"),
           perSecSliderControl(0.1, 1),
+          Text("Time Frame To Check Treshold"),
           timeSampleSliderControl(5, 600),
-          Row(
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                child: IconButton(
-                  icon: Icon(Icons.file_upload),
-                  onPressed: () => openAudioPicker(),
-                ),
-              ),
-              Flexible(
-                child: GestureDetector(
-                    onTap: () => openAudioPicker(),
-                    child: Text(this._currentAudioName)),
-              ),
-            ],
-          )
+          Text("Audio Alert On Treshold"),
+          audioChooseControl()
         ]),
       ),
       floatingActionButton: buildActionMicButton(),
     );
   }
 
+  // Widget for audio chooser
+  Row audioChooseControl() {
+    return Row(
+      children: [
+        Container(
+          width: 50,
+          height: 50,
+          child: IconButton(
+            icon: Icon(Icons.file_upload),
+            onPressed: () => openAudioPicker(),
+          ),
+        ),
+        Flexible(
+          child: GestureDetector(
+              onTap: () => openAudioPicker(),
+              child: Text(this._currentAudioName)),
+        ),
+      ],
+    );
+  }
+
+  // Widget for dB slider
   Row dBTresholdSliderControl(double minVal, double maxVal) {
     return Row(
       children: [
@@ -175,6 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // Widget for persec slider
   Row perSecSliderControl(double minVal, double maxVal) {
     return Row(
       children: [
@@ -211,6 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // Widget for time frame slider
   Row timeSampleSliderControl(double minVal, double maxVal) {
     return Row(
       children: [
@@ -247,6 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // Widget mic button
   FloatingActionButton buildActionMicButton() {
     return FloatingActionButton(
         backgroundColor: _isRecording ? Colors.red : Colors.green,
@@ -254,22 +297,21 @@ class _HomeScreenState extends State<HomeScreen> {
         child: _isRecording ? Icon(Icons.stop) : Icon(Icons.mic));
   }
 
-  void changeText(text) {
-    var db = double.parse(text);
-    if (db > activeDbValue) {
-      bgColor = Colors.red[300];
-      if (currentTimeInSeconds() > lastTimeBell + 3) {
+  // Processes dB values to check average volume
+  void dBProcessor(text) {
+    if (dBValueList.length == arrLength) {
+      dBValueList.removeAt(0);
+    }
+    dBValueList.add(double.parse(text));
+    if (dBValueList.length == arrLength) {
+      double avg = 0;
+      for (double x in dBValueList) {
+        avg += x;
+      }
+      avg /= dBValueList.length;
+      if (avg > activeDbValue) {
         playAudio();
-        lastTimeBell = currentTimeInSeconds();
       }
     }
-    setState(() {
-      this.text = text;
-    });
-  }
-
-  static int currentTimeInSeconds() {
-    var ms = (new DateTime.now()).millisecondsSinceEpoch;
-    return (ms / 1000).round();
   }
 }
