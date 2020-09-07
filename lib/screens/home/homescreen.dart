@@ -1,6 +1,7 @@
 import 'package:noise_meter/noise_meter.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
@@ -19,18 +20,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer timer; //timer used for persec dB checks
 
   Color _bgColor = Colors.white; //default bg color of app
-  // absolute path of current audio file, selected audio file after recording started
-  String absAudioPath, activeAudioFile;
-  // _current - realtime values of sliders, active - values after recoding started
-  double _currentDbValue,
-      _currentPerSecValue,
-      _currentTimeSampleValue,
-      activeDbValue,
-      activePerSecValue,
-      activeTimeSampleValue;
-
-  String _currentAudioName =
-      "Choose audio file..."; //current audio name(without path)
+  //elected audio files after recording started
+  String _activeAudioFile1, _activeAudioFile2, _activeAudioFile3;
+  // units(seconds, minutes, hours)
+  String _activePerSecUnit, _activeTimeSampleUnit;
+  // values
+  int _activeDbValue, _activePerSecValue, _activeTimeSampleValue;
+  int _timeLastAudioPlayed = 0;
+  int activeTimeoutValue;
 
   String _dBValueRealTime; //realtime dB value when recording
 
@@ -43,9 +40,6 @@ class _HomeScreenState extends State<HomeScreen> {
     audioPlayer = AudioPlayer();
     _noiseMeter = new NoiseMeter();
     _isRecording = false;
-    _currentDbValue = 70;
-    _currentPerSecValue = 1;
-    _currentTimeSampleValue = 60;
     arrLength = 0;
   }
 
@@ -59,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void getdBData() {
     setState(() {
       timer = Timer.periodic(
-          Duration(milliseconds: (1000 / activePerSecValue).round()),
+          Duration(milliseconds: (1000 / _activePerSecValue).round()),
           (Timer t) {
         dBProcessor(_dBValueRealTime);
       });
@@ -80,13 +74,15 @@ class _HomeScreenState extends State<HomeScreen> {
   void start() async {
     try {
       _noiseSubscription = _noiseMeter.noiseStream.listen(onData);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
       setState(() {
         //Sets active values from sliders and calculates the length of an array
-        activeDbValue = _currentDbValue;
-        activePerSecValue = _currentPerSecValue;
-        activeTimeSampleValue = _currentTimeSampleValue;
-        activeAudioFile = absAudioPath;
-        arrLength = (activePerSecValue * activeTimeSampleValue).floor();
+        _activeDbValue = prefs.getInt("dbValue") ?? 30;
+        _activePerSecValue = prefs.getInt("persecValue") ?? 1;
+        _activeTimeSampleValue = prefs.getInt("timesampleValue") ?? 1;
+        activeTimeoutValue = prefs.getInt("timeoutValue") ?? 1;
+        _activeAudioFile1 = prefs.getString("audioname1Value") ?? '0';
+        arrLength = (_activePerSecValue * _activeTimeSampleValue).floor();
         dBValueList = new List<double>();
       });
       getdBData(); //Calls function to start persec timer
@@ -115,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //Play audio file
   void playAudio() async {
-    await audioPlayer.play(activeAudioFile, isLocal: true);
+    await audioPlayer.play(_activeAudioFile1, isLocal: true);
   }
 
   //Stops audio file
@@ -162,8 +158,13 @@ class _HomeScreenState extends State<HomeScreen> {
         avg += x;
       }
       avg /= dBValueList.length;
-      if (avg > activeDbValue) {
+      int x = ((new DateTime.now()).millisecondsSinceEpoch / 1000).round();
+      if (avg > _activeDbValue &&
+          x > _timeLastAudioPlayed + activeTimeoutValue) {
         playAudio();
+        _timeLastAudioPlayed =
+            ((new DateTime.now()).millisecondsSinceEpoch / 1000).round();
+        dBValueList.clear();
       }
     }
   }
