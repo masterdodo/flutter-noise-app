@@ -1,6 +1,5 @@
 import 'package:noise_meter/noise_meter.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -60,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void getdBData() {
     setState(() {
       timer = Timer.periodic(
-          Duration(milliseconds: (activePerSecValue * 1000).round()),
+          Duration(milliseconds: (1000 / activePerSecValue).round()),
           (Timer t) {
         dBProcessor(_dBValueRealTime);
       });
@@ -87,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
         activePerSecValue = _currentPerSecValue;
         activeTimeSampleValue = _currentTimeSampleValue;
         activeAudioFile = absAudioPath;
-        arrLength = ((1.0 / activePerSecValue) * activeTimeSampleValue).floor();
+        arrLength = (activePerSecValue * activeTimeSampleValue).floor();
         dBValueList = new List<double>();
       });
       getdBData(); //Calls function to start persec timer
@@ -114,15 +113,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  //Used to choose audio file, then sets the path of file and gets just the name of the file
-  void openAudioPicker() async {
-    String path = await FilePicker.getFilePath(type: FileType.audio);
-    setState(() {
-      absAudioPath = path;
-      _currentAudioName = path.split("/")[path.split("/").length - 1];
-    });
-  }
-
   //Play audio file
   void playAudio() async {
     await audioPlayer.play(activeAudioFile, isLocal: true);
@@ -143,149 +133,12 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(children: [
-          Text("dB Treshold"),
-          dBTresholdSliderControl(30, 150),
-          Text("Check For Value Per Second"),
-          perSecSliderControl(0.1, 1),
-          Text("Time Frame To Check Treshold"),
-          timeSampleSliderControl(5, 600),
-          Text("Audio Alert On Treshold"),
-          audioChooseControl()
+          FlatButton(
+              onPressed: () => Navigator.pushNamed(context, '/settings'),
+              child: Text("Settings"))
         ]),
       ),
       floatingActionButton: buildActionMicButton(),
-    );
-  }
-
-  // Widget for audio chooser
-  Row audioChooseControl() {
-    return Row(
-      children: [
-        Container(
-          width: 50,
-          height: 50,
-          child: IconButton(
-            icon: Icon(Icons.file_upload),
-            onPressed: () => openAudioPicker(),
-          ),
-        ),
-        Flexible(
-          child: GestureDetector(
-              onTap: () => openAudioPicker(),
-              child: Text(this._currentAudioName)),
-        ),
-      ],
-    );
-  }
-
-  // Widget for dB slider
-  Row dBTresholdSliderControl(double minVal, double maxVal) {
-    return Row(
-      children: [
-        Flexible(
-          child: Slider(
-              min: minVal,
-              max: maxVal,
-              value: _currentDbValue,
-              label: _currentDbValue.round().toString(),
-              onChanged: (double val) {
-                setState(() {
-                  _currentDbValue = val;
-                });
-              }),
-        ),
-        Container(
-          width: 30,
-          child: TextField(
-            controller:
-                TextEditingController(text: _currentDbValue.round().toString()),
-            decoration:
-                InputDecoration(border: InputBorder.none, hintText: 'dB'),
-            onChanged: (String text) {
-              if (double.parse(text) >= minVal &&
-                  double.parse(text) <= maxVal) {
-                setState(() {
-                  _currentDbValue = double.parse(text);
-                });
-              }
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Widget for persec slider
-  Row perSecSliderControl(double minVal, double maxVal) {
-    return Row(
-      children: [
-        Flexible(
-          child: Slider(
-              min: minVal,
-              max: maxVal,
-              value: _currentPerSecValue,
-              label: _currentPerSecValue.toStringAsFixed(2),
-              onChanged: (double val) {
-                setState(() {
-                  _currentPerSecValue = val;
-                });
-              }),
-        ),
-        Container(
-          width: 30,
-          child: TextField(
-            controller: TextEditingController(
-                text: _currentPerSecValue.toStringAsFixed(2)),
-            decoration:
-                InputDecoration(border: InputBorder.none, hintText: 'dB'),
-            onChanged: (String text) {
-              if (double.parse(text) >= minVal &&
-                  double.parse(text) <= maxVal) {
-                setState(() {
-                  _currentPerSecValue = double.parse(text);
-                });
-              }
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Widget for time frame slider
-  Row timeSampleSliderControl(double minVal, double maxVal) {
-    return Row(
-      children: [
-        Flexible(
-          child: Slider(
-              min: minVal,
-              max: maxVal,
-              value: _currentTimeSampleValue,
-              label: _currentTimeSampleValue.round().toString(),
-              onChanged: (double val) {
-                setState(() {
-                  _currentTimeSampleValue = val;
-                });
-              }),
-        ),
-        Container(
-          width: 30,
-          child: TextField(
-            controller: TextEditingController(
-                text: _currentTimeSampleValue.round().toString()),
-            decoration:
-                InputDecoration(border: InputBorder.none, hintText: 'dB'),
-            onChanged: (String text) {
-              if (double.parse(text) >= minVal &&
-                  double.parse(text) <= maxVal) {
-                setState(() {
-                  _currentTimeSampleValue = double.parse(text);
-                });
-              }
-            },
-          ),
-        ),
-      ],
     );
   }
 
