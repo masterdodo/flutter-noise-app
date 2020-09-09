@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:noise_app/app_localizations.dart';
 import 'package:noise_meter/noise_meter.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
@@ -16,18 +19,30 @@ class _HomeScreenState extends State<HomeScreen> {
   NoiseMeter _noiseMeter; //getting dB values from mic
   AudioPlayer audioPlayer; //audio alert player
 
+  final audioString = "Choose audio file...";
+  Duration duration;
+
   final controller = TextEditingController(); //text controller
   Timer timer; //timer used for persec dB checks
+
+  final snackBarNoAudio = SnackBar(
+    content: Text(
+      "No audio. Select it in the settings!",
+      style: TextStyle(color: Colors.black),
+    ),
+    backgroundColor: Colors.redAccent[400],
+    duration: Duration(seconds: 2),
+  );
 
   Color _bgColor = Colors.white; //default bg color of app
   //elected audio files after recording started
   String _activeAudioFile1, _activeAudioFile2, _activeAudioFile3;
   // units(seconds, minutes, hours)
-  String _activePerSecUnit, _activeTimeSampleUnit;
+  String _activePerSecUnit, _activeTimeSampleUnit, _activeTimeoutUnit;
   // values
   int _activeDbValue, _activePerSecValue, _activeTimeSampleValue;
   int _timeLastAudioPlayed = 0;
-  int activeTimeoutValue;
+  int _activeTimeoutValue;
 
   String _dBValueRealTime; //realtime dB value when recording
 
@@ -71,21 +86,47 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   //Turn MIC on
-  void start() async {
+  void start(context) async {
     try {
-      _noiseSubscription = _noiseMeter.noiseStream.listen(onData);
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      setState(() {
-        //Sets active values from sliders and calculates the length of an array
-        _activeDbValue = prefs.getInt("dbValue") ?? 30;
-        _activePerSecValue = prefs.getInt("persecValue") ?? 1;
-        _activeTimeSampleValue = prefs.getInt("timesampleValue") ?? 1;
-        activeTimeoutValue = prefs.getInt("timeoutValue") ?? 1;
-        _activeAudioFile1 = prefs.getString("audioname1Value") ?? '0';
-        arrLength = (_activePerSecValue * _activeTimeSampleValue).floor();
-        dBValueList = new List<double>();
-      });
-      getdBData(); //Calls function to start persec timer
+      if (prefs.getString("audioname1Value") == null ||
+          prefs.getString("audioname1Value") == audioString) {
+        Scaffold.of(context).showSnackBar(snackBarNoAudio);
+      } else {
+        _noiseSubscription = _noiseMeter.noiseStream.listen(onData);
+        setState(() {
+          //Sets active values from sliders and calculates the length of an array
+          _activeDbValue = prefs.getInt("dbValue") ?? 30;
+          _activePerSecValue = prefs.getInt("persecValue") ?? 1;
+          _activePerSecUnit = prefs.getString("persecUnit") ?? 'sec';
+          if (_activePerSecUnit == 'min') {
+            _activePerSecValue *= 60;
+          } else if (_activePerSecUnit == 'hr') {
+            _activePerSecValue *= 3600;
+          }
+          _activeTimeSampleValue = prefs.getInt("timesampleValue") ?? 1;
+          _activeTimeSampleUnit = prefs.getString("timesampleUnit") ?? 'sec';
+          if (_activeTimeSampleUnit == 'min') {
+            _activeTimeSampleValue *= 60;
+            print(_activeTimeSampleValue);
+          } else if (_activeTimeSampleUnit == 'hr') {
+            _activeTimeSampleValue *= 3600;
+          }
+          _activeTimeoutValue = prefs.getInt("timeoutValue") ?? 1;
+          _activeTimeoutUnit = prefs.getString("timeoutUnit") ?? 'sec';
+          if (_activeTimeoutUnit == 'min') {
+            _activeTimeoutValue *= 60;
+          } else if (_activeTimeoutUnit == 'hr') {
+            _activeTimeoutValue *= 3600;
+          }
+          _activeAudioFile1 = prefs.getString("audioname1Value") ?? '';
+          _activeAudioFile2 = prefs.getString("audioname2Value") ?? '';
+          _activeAudioFile3 = prefs.getString("audioname3Value") ?? '';
+          arrLength = (_activePerSecValue * _activeTimeSampleValue).floor();
+          dBValueList = new List<double>();
+        });
+        getdBData(); //Calls function to start persec timer
+      }
     } catch (err) {
       print(err);
     }
@@ -103,6 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
       dBValueList.clear(); //Clears/Resets array of realtime dB values
       this.setState(() {
         this._isRecording = false;
+        this._timeLastAudioPlayed = 0;
       });
     } catch (err) {
       print('stopRecorder error: $err');
@@ -112,6 +154,10 @@ class _HomeScreenState extends State<HomeScreen> {
   //Play audio file
   void playAudio() async {
     await audioPlayer.play(_activeAudioFile1, isLocal: true);
+    audioPlayer.onDurationChanged.listen((Duration d) {
+      print('Max duration: $d');
+      setState(() => duration = d);
+    });
   }
 
   //Stops audio file
@@ -124,30 +170,42 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: _bgColor,
       appBar: AppBar(
-        title: Text("Noise App"),
+        title: Text(AppLocalizations.of(context).translate('main_string')),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(10.0),
         child: Column(children: [
-          FlatButton(
+          RaisedButton(
+              color: Colors.lightBlue[300],
+              padding: EdgeInsets.all(10),
+              shape: CircleBorder(),
               onPressed: () => Navigator.pushNamed(context, '/settings'),
-              child: Text("Settings"))
+              child: Icon(Icons.settings))
         ]),
       ),
-      floatingActionButton: buildActionMicButton(),
+      floatingActionButton: buildActionMicButton(context),
     );
   }
 
   // Widget mic button
-  FloatingActionButton buildActionMicButton() {
+  FloatingActionButton buildActionMicButton(context) {
     return FloatingActionButton(
         backgroundColor: _isRecording ? Colors.red : Colors.green,
-        onPressed: _isRecording ? this.stop : this.start,
+        onPressed: _isRecording ? this.stop : () => this.start(context),
         child: _isRecording ? Icon(Icons.stop) : Icon(Icons.mic));
   }
 
   // Processes dB values to check average volume
   void dBProcessor(text) {
+    if (duration != null &&
+        (_timeLastAudioPlayed + duration.inSeconds >
+            (new DateTime.now().millisecondsSinceEpoch / 1000).round())) {
+    } else {
+      dBProcessorAfterSound(text);
+    }
+  }
+
+  void dBProcessorAfterSound(text) {
     if (dBValueList.length == arrLength) {
       dBValueList.removeAt(0);
     }
@@ -160,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
       avg /= dBValueList.length;
       int x = ((new DateTime.now()).millisecondsSinceEpoch / 1000).round();
       if (avg > _activeDbValue &&
-          x > _timeLastAudioPlayed + activeTimeoutValue) {
+          x > _timeLastAudioPlayed + _activeTimeoutValue) {
         playAudio();
         _timeLastAudioPlayed =
             ((new DateTime.now()).millisecondsSinceEpoch / 1000).round();

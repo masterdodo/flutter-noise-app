@@ -1,0 +1,10 @@
+{
+    "main_string": "Zvočna aplikacija",
+    "settings_string": "Nastavitve",
+    "db_treshold_string": "dB Meja",
+    "per_sec_string": "Preveri Vrednost na Enoto",
+    "time_frame_string": "Čas v Katerem se Preveri Meja",
+    "timeout_string": "Odmor po Alarmu",
+    "audio_string": "Zvočni Alarmi ob Meji",
+    "save_string": "Shrani Nastavitve"
+}
