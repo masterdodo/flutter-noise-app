@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:noise_app/app_localizations.dart';
 import 'package:noise_meter/noise_meter.dart';
 import 'package:audioplayers/audioplayers.dart';
