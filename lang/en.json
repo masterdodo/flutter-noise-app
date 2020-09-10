@@ -6,5 +6,6 @@
     "time_frame_string": "Time Frame To Check Treshold",
     "timeout_string": "Timeout After Alert",
     "audio_string": "Audio Alerts on Treshold",
-    "save_string": "Save Settings"
+    "save_string": "Save Settings",
+    "choose_sound_string": "Choose audio file..."
 }

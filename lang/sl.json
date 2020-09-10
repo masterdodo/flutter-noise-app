@@ -6,5 +6,6 @@
     "time_frame_string": "Čas v Katerem se Preveri Meja",
     "timeout_string": "Odmor po Alarmu",
     "audio_string": "Zvočni Alarmi ob Meji",
-    "save_string": "Shrani Nastavitve"
+    "save_string": "Shrani Nastavitve",
+    "choose_sound_string": "Izberi zvočno datoteko..."
 }
