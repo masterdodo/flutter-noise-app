@@ -29,6 +29,8 @@ dependencies:
 
   noise_meter:
 
+  flutter_sparkline: ^0.1.0
+
   audioplayers: ^0.10.0
 
   file_picker: ^1.13.3

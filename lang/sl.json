@@ -7,5 +7,7 @@
     "timeout_string": "Odmor po Alarmu",
     "audio_string": "Zvočni Alarmi ob Meji",
     "save_string": "Shrani Nastavitve",
-    "choose_sound_string": "Izberi zvočno datoteko..."
+    "choose_sound_string": "Izberi zvočno datoteko...",
+    "menu_home_string": "Domov",
+    "menu_settings_string": "Nastavitve"
 }

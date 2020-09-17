@@ -7,5 +7,7 @@
     "timeout_string": "Timeout After Alert",
     "audio_string": "Audio Alerts on Treshold",
     "save_string": "Save Settings",
-    "choose_sound_string": "Choose audio file..."
+    "choose_sound_string": "Choose audio file...",
+    "menu_home_string": "Home",
+    "menu_settings_string": "Settings"
 }

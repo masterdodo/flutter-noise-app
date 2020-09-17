@@ -1,4 +1,5 @@
 import 'package:noise_app/app_localizations.dart';
+import 'package:noise_app/components/my_drawer.dart';
 import 'package:noise_meter/noise_meter.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
@@ -167,20 +168,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _bgColor,
+      drawer: MyDrawer(),
       appBar: AppBar(
         title: Text(AppLocalizations.of(context).translate('main_string')),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(children: [
-          RaisedButton(
-              color: Colors.lightBlue[300],
-              padding: EdgeInsets.all(10),
-              shape: CircleBorder(),
-              onPressed: () => Navigator.pushNamed(context, '/settings'),
-              child: Icon(Icons.settings))
-        ]),
-      ),
+      body: null,
       floatingActionButton: buildActionMicButton(context),
     );
   }

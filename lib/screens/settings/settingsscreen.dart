@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:noise_app/components/my_drawer.dart';
 import 'package:noise_app/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
@@ -142,6 +143,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _bgColor,
+      drawer: MyDrawer(),
       appBar: AppBar(
         title: Text(AppLocalizations.of(context).translate('settings_string')),
         backgroundColor: Colors.blue,
