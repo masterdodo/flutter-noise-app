@@ -9,5 +9,6 @@
     "save_string": "Shrani Nastavitve",
     "choose_sound_string": "Izberi zvočno datoteko...",
     "menu_home_string": "Domov",
-    "menu_settings_string": "Nastavitve"
+    "menu_settings_string": "Nastavitve",
+    "menu_tools_string": "Orodja"
 }

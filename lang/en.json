@@ -9,5 +9,6 @@
     "save_string": "Save Settings",
     "choose_sound_string": "Choose audio file...",
     "menu_home_string": "Home",
-    "menu_settings_string": "Settings"
+    "menu_settings_string": "Settings",
+    "menu_tools_string": "Tools"
 }

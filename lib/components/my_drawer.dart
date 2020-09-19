@@ -32,6 +32,20 @@ class MyDrawer extends StatelessWidget {
             },
           ),
           ListTile(
+            selected: (ModalRoute.of(context).settings.name == '/tools'),
+            title: Text(
+                AppLocalizations.of(context).translate('menu_tools_string')),
+            leading: Icon(Icons.build),
+            onTap: () {
+              if (ModalRoute.of(context).settings.name == '/tools') {
+                Navigator.pop(context);
+              } else {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/tools');
+              }
+            },
+          ),
+          ListTile(
             selected: (ModalRoute.of(context).settings.name == '/settings'),
             title: Text(
                 AppLocalizations.of(context).translate('menu_settings_string')),
