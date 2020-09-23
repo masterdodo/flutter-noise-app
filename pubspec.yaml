@@ -27,7 +27,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  noise_meter:
+  noise_meter: ^1.2.0+1
 
   audioplayers: ^0.16.1
 
