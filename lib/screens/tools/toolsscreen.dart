@@ -91,7 +91,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
     });
   }
 
-  void start_sw() {
+  void startSw() {
     setState(() {
       _isRunning = true;
     });
@@ -99,14 +99,14 @@ class _ToolsScreenState extends State<ToolsScreen> {
     starttimer();
   }
 
-  void stop_sw() {
+  void stopSw() {
     setState(() {
       _isRunning = false;
     });
     sw.stop();
   }
 
-  void reset_sw() {
+  void resetSw() {
     sw.reset();
     setState(() {
       stopwatchDisplay = "00:00:00";
@@ -119,8 +119,9 @@ class _ToolsScreenState extends State<ToolsScreen> {
       backgroundColor: _bgColor,
       drawer: MyDrawer(),
       appBar: AppBar(
-          title: Text(
-              AppLocalizations.of(context).translate('menu_tools_string'))),
+        title:
+            Text(AppLocalizations.of(context).translate('menu_tools_string')),
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.all(10.0),
@@ -155,11 +156,13 @@ class _ToolsScreenState extends State<ToolsScreen> {
                         ? Icon(Icons.stop)
                         : Icon(Icons.play_arrow),
                   ),
-                  Text(this.meanDb,
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.normal,
-                      )),
+                  Text(
+                    this.meanDb,
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
                 ],
               ),
               Padding(
@@ -179,7 +182,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
                 children: [
                   RaisedButton(
                     padding: EdgeInsets.all(15),
-                    onPressed: _isRunning ? this.stop_sw : this.start_sw,
+                    onPressed: _isRunning ? this.stopSw : this.startSw,
                     color: _isRunning ? Colors.red : Colors.green,
                     shape: CircleBorder(),
                     child:
@@ -187,16 +190,18 @@ class _ToolsScreenState extends State<ToolsScreen> {
                   ),
                   RaisedButton(
                     padding: EdgeInsets.all(15),
-                    onPressed: this.reset_sw,
+                    onPressed: this.resetSw,
                     color: Colors.blue,
                     shape: CircleBorder(),
                     child: Icon(Icons.clear),
                   ),
-                  Text(stopwatchDisplay,
-                      style: TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.w600,
-                      ))
+                  Text(
+                    stopwatchDisplay,
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  )
                 ],
               ),
             ],
