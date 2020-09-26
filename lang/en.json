@@ -10,5 +10,8 @@
     "choose_sound_string": "Choose audio file...",
     "menu_home_string": "Home",
     "menu_settings_string": "Settings",
-    "menu_tools_string": "Tools"
+    "menu_tools_string": "Tools",
+    "noise_meter_string": "Noise Meter",
+    "average_noise_string": "Average dB",
+    "stopwatch_string": "Stopwatch"
 }

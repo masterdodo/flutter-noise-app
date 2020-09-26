@@ -132,7 +132,8 @@ class _ToolsScreenState extends State<ToolsScreen> {
                 child: Row(
                   children: [
                     Text(
-                      'Noise Meter',
+                      AppLocalizations.of(context)
+                          .translate('noise_meter_string'),
                       style:
                           TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
@@ -143,7 +144,8 @@ class _ToolsScreenState extends State<ToolsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Text(
-                    "Average dB",
+                    AppLocalizations.of(context)
+                        .translate('average_noise_string'),
                     style:
                         TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
                   ),
@@ -170,7 +172,8 @@ class _ToolsScreenState extends State<ToolsScreen> {
                 child: Row(
                   children: [
                     Text(
-                      'Stopwatch',
+                      AppLocalizations.of(context)
+                          .translate('stopwatch_string'),
                       style:
                           TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     )

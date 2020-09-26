@@ -10,5 +10,8 @@
     "choose_sound_string": "Izberi zvočno datoteko...",
     "menu_home_string": "Domov",
     "menu_settings_string": "Nastavitve",
-    "menu_tools_string": "Orodja"
+    "menu_tools_string": "Orodja",
+    "noise_meter_string": "Merilec Zvoka",
+    "average_noise_string": "Povprečen dB",
+    "stopwatch_string": "Štoparica"
 }
