@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../app_localizations.dart';
 
@@ -58,7 +59,42 @@ class MyDrawer extends StatelessWidget {
                 Navigator.pushNamed(context, '/settings');
               }
             },
-          )
+          ),
+          ListTile(
+            selected: (ModalRoute.of(context).settings.name == '/help'),
+            title: Text(AppLocalizations.of(context).translate('help_string')),
+            leading: Icon(Icons.help),
+            onTap: () {
+              if (ModalRoute.of(context).settings.name == '/help') {
+                Navigator.pop(context);
+              } else {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/help');
+              }
+            },
+          ),
+          ListTile(
+            selected: (ModalRoute.of(context).settings.name == '/about'),
+            title: Text(AppLocalizations.of(context).translate('about_string')),
+            leading: Icon(Icons.question_answer),
+            onTap: () {
+              if (ModalRoute.of(context).settings.name == '/about') {
+                Navigator.pop(context);
+              } else {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/about');
+              }
+            },
+          ),
+          Divider(
+            color: Colors.grey,
+            height: 30,
+          ),
+          ListTile(
+            leading: Icon(Icons.exit_to_app),
+            title: Text(AppLocalizations.of(context).translate('exit_string')),
+            onTap: () => SystemNavigator.pop(),
+          ),
         ],
       ),
     );

@@ -39,7 +39,10 @@ class _HomeScreenState extends State<HomeScreen> {
   // units(seconds, minutes, hours)
   String _activePerSecUnit, _activeTimeSampleUnit, _activeTimeoutUnit;
   // values
-  int _activeDbValue, _activePerSecValue, _activeTimeSampleValue;
+  int _activeDbValue,
+      _activePerSecValue,
+      _activeTimeSampleValue,
+      _activeAudioVolumeValue;
   int _timeLastAudioPlayed = 0;
   int _activeTimeoutValue;
 
@@ -118,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
           } else if (_activeTimeoutUnit == 'hr') {
             _activeTimeoutValue *= 3600;
           }
+          _activeAudioVolumeValue = prefs.getInt("audiovolumeValue") ?? 100;
           _activeAudioFile1 = prefs.getString("audioname1Value") ?? '';
           _activeAudioFile2 = prefs.getString("audioname2Value") ?? '';
           _activeAudioFile3 = prefs.getString("audioname3Value") ?? '';
@@ -172,17 +176,26 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context).translate('main_string')),
       ),
-      body: null,
-      floatingActionButton: buildActionMicButton(context),
+      body: Center(
+        child: RaisedButton(
+          padding: EdgeInsets.all(65),
+          color: _isRecording ? Colors.red : Colors.green,
+          shape: CircleBorder(),
+          onPressed: _isRecording ? this.stop : () => this.start(context),
+          child: _isRecording
+              ? Icon(
+                  Icons.stop,
+                  color: Colors.white,
+                  size: 50,
+                )
+              : Icon(
+                  Icons.mic,
+                  color: Colors.white,
+                  size: 50,
+                ),
+        ),
+      ),
     );
-  }
-
-  // Widget mic button
-  FloatingActionButton buildActionMicButton(context) {
-    return FloatingActionButton(
-        backgroundColor: _isRecording ? Colors.red : Colors.green,
-        onPressed: _isRecording ? this.stop : () => this.start(context),
-        child: _isRecording ? Icon(Icons.stop) : Icon(Icons.mic));
   }
 
   // Processes dB values to check average volume

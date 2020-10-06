@@ -38,6 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   int _currentDbValue,
       _currentPerSecValue,
       _currentTimeSampleValue,
+      _currentAudioVolumeValue,
       _currentTimeoutValue = 0;
 
   String _persecUnit = "sec";
@@ -55,6 +56,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _currentPerSecValue = prefs.getInt("persecValue") ?? 1;
       _currentTimeSampleValue = prefs.getInt("timesampleValue") ?? 1;
       _currentTimeoutValue = prefs.getInt("timeoutValue") ?? 1;
+      _currentAudioVolumeValue = prefs.getInt("audiovolumeValue") ?? 100;
       _currentAudioName1 = prefs.getString("audioname1Value") ?? audioString;
       _currentAudioName2 = prefs.getString("audioname2Value") ?? audioString;
       _currentAudioName3 = prefs.getString("audioname3Value") ?? audioString;
@@ -132,11 +134,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
       prefs.setString("timesampleUnit", _timesampleUnit);
       prefs.setInt("timeoutValue", _currentTimeoutValue);
       prefs.setString("timeoutUnit", _timeoutUnit);
+      prefs.setInt("audiovolumeValue", _currentAudioVolumeValue);
       prefs.setString("audioname1Value", _currentAudioName1);
       prefs.setString("audioname2Value", _currentAudioName2);
       prefs.setString("audioname3Value", _currentAudioName3);
       Scaffold.of(context).showSnackBar(snackBarSuccessSettings);
     }
+  }
+
+  void resetSettingsValues() async {
+    setState(() {
+      _currentDbValue = 66;
+      _currentPerSecValue = 5;
+      _persecUnit = "sec";
+      _currentTimeSampleValue = 1;
+      _timesampleUnit = "sec";
+      _currentTimeoutValue = 6;
+      _timeoutUnit = "sec";
+      _currentAudioName1 = "Snorty.mp3";
+      _currentAudioName2 = audioString;
+      _currentAudioName3 = audioString;
+      _currentAudioVolumeValue = 70;
+    });
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt("dbValue", _currentDbValue);
+    prefs.setInt("persecValue", _currentPerSecValue);
+    prefs.setString("persecUnit", _persecUnit);
+    prefs.setInt("timesampleValue", _currentTimeSampleValue);
+    prefs.setString("timesampleUnit", _timesampleUnit);
+    prefs.setInt("timeoutValue", _currentTimeoutValue);
+    prefs.setString("timeoutUnit", _timeoutUnit);
+    prefs.setInt("audiovolumeValue", _currentAudioVolumeValue);
+    prefs.setString("audioname1Value", _currentAudioName1);
+    prefs.setString("audioname2Value", _currentAudioName2);
+    prefs.setString("audioname3Value", _currentAudioName3);
   }
 
   @override
@@ -211,6 +242,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Column(
                 children: [
                   Text(
+                      AppLocalizations.of(context)
+                          .translate('sound_volume_string'),
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  audioVolumeSliderControl(1, 100),
+                ],
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(bottom: 20),
+              padding: EdgeInsets.all(5),
+              decoration: sliderBoxDecoration(),
+              child: Column(
+                children: [
+                  Text(
                     AppLocalizations.of(context).translate('audio_string'),
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
@@ -232,6 +277,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         child: audioChooseControl3()),
                   ),
                 ],
+              ),
+            ),
+            Container(
+              child: RaisedButton(
+                onPressed: () => resetSettingsValues(),
+                color: Colors.white,
+                child: Text(AppLocalizations.of(context)
+                    .translate('default_settings_string')),
               ),
             ),
             Builder(builder: (BuildContext context) {
@@ -303,10 +356,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         Flexible(
           child: GestureDetector(
-              onTap: () => openAudioPicker1(),
-              child: Text(_currentAudioName1
-                  .split("/")[_currentAudioName1.split("/").length - 1])),
-        ),
+            onTap: () => openAudioPicker1(),
+            child: Text(_currentAudioName1 != audioString
+                ? (_currentAudioName1
+                    .split("/")[_currentAudioName1.split("/").length - 1])
+                : AppLocalizations.of(context)
+                    .translate('choose_sound_string')),
+          ),
+        )
       ],
     );
   }
@@ -342,10 +399,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         Flexible(
           child: GestureDetector(
-              onTap: () => openAudioPicker2(),
-              child: Text(_currentAudioName2
-                  .split("/")[_currentAudioName2.split("/").length - 1])),
-        ),
+            onTap: () => openAudioPicker2(),
+            child: Text(_currentAudioName2 != audioString
+                ? (_currentAudioName2
+                    .split("/")[_currentAudioName2.split("/").length - 1])
+                : AppLocalizations.of(context)
+                    .translate('choose_sound_string')),
+          ),
+        )
       ],
     );
   }
@@ -380,8 +441,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Flexible(
           child: GestureDetector(
               onTap: () => openAudioPicker3(),
-              child: Text(_currentAudioName3
-                  .split("/")[_currentAudioName3.split("/").length - 1])),
+              child: Text(_currentAudioName3 != audioString
+                  ? (_currentAudioName3
+                      .split("/")[_currentAudioName3.split("/").length - 1])
+                  : AppLocalizations.of(context)
+                      .translate('choose_sound_string'))),
         ),
       ],
     );
@@ -609,6 +673,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 );
               }).toList(),
             )),
+      ],
+    );
+  }
+
+  Row audioVolumeSliderControl(double minVal, double maxVal) {
+    return Row(
+      children: [
+        Flexible(
+          child: Slider(
+              min: minVal,
+              max: maxVal,
+              divisions: (maxVal - minVal).round(),
+              value: _currentAudioVolumeValue.toDouble(),
+              label: _currentAudioVolumeValue.toString(),
+              onChanged: (double val) {
+                setState(() {
+                  _currentAudioVolumeValue = val.round();
+                });
+              }),
+        ),
+        Container(
+          width: 30,
+          child: TextField(
+            controller: TextEditingController(
+                text: _currentAudioVolumeValue.toString()),
+            decoration:
+                InputDecoration(border: InputBorder.none, hintText: 'dB'),
+            onChanged: (String text) {
+              if (double.parse(text) >= minVal &&
+                  double.parse(text) <= maxVal) {
+                setState(() {
+                  _currentAudioVolumeValue = int.parse(text);
+                });
+              }
+            },
+          ),
+        ),
+        Container(
+            child: Text(
+          "%",
+          style: TextStyle(
+            fontSize: 18,
+          ),
+        )),
       ],
     );
   }
