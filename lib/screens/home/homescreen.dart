@@ -4,6 +4,7 @@ import 'package:noise_meter/noise_meter.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:volume/volume.dart';
 import 'dart:async';
 
 class HomeScreen extends StatefulWidget {

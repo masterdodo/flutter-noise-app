@@ -79,8 +79,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   //Used to choose audio file, then sets the path of file and gets just the name of the file
   void openAudioPicker1() async {
-    String path = await FilePicker.getFilePath(type: FileType.audio) ??
-        _currentAudioName1;
+    FilePickerResult result =
+        await FilePicker.platform.pickFiles(type: FileType.audio);
+    String path;
+    if (result == null) {
+      path = _currentAudioName1;
+    } else {
+      path = result.files.single.path;
+    }
     setState(() {
       _currentAudioName1 = path;
     });
@@ -94,8 +100,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   //Used to choose audio file, then sets the path of file and gets just the name of the file
   void openAudioPicker2() async {
-    String path = await FilePicker.getFilePath(type: FileType.audio) ??
-        _currentAudioName2;
+    FilePickerResult result =
+        await FilePicker.platform.pickFiles(type: FileType.audio);
+    String path;
+    if (result == null) {
+      path = _currentAudioName2;
+    } else {
+      path = result.files.single.path;
+    }
     setState(() {
       _currentAudioName2 = path;
     });
@@ -109,8 +121,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   //Used to choose audio file, then sets the path of file and gets just the name of the file
   void openAudioPicker3() async {
-    String path = await FilePicker.getFilePath(type: FileType.audio) ??
-        _currentAudioName3;
+    FilePickerResult result =
+        await FilePicker.platform.pickFiles(type: FileType.audio);
+    String path;
+    if (result == null) {
+      path = _currentAudioName3;
+    } else {
+      path = result.files.single.path;
+    }
     setState(() {
       _currentAudioName3 = path;
     });
