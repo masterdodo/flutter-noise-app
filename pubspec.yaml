@@ -35,6 +35,8 @@ dependencies:
 
   volume: ^1.0.1
 
+  flutter_local_notifications: ^2.0.0
+
   shared_preferences: ^0.5.10
 
   # The following adds the Cupertino Icons font to your application.

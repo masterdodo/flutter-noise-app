@@ -5,6 +5,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:volume/volume.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
@@ -18,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _noiseSubscription; //getting dB values from mic
   NoiseMeter _noiseMeter; //getting dB values from mic
   AudioPlayer audioPlayer; //audio alert player
+  AudioManager audioManager;
 
   final audioString = "Choose audio file...";
   Duration duration;
@@ -47,10 +49,14 @@ class _HomeScreenState extends State<HomeScreen> {
   int _timeLastAudioPlayed = 0;
   int _activeTimeoutValue;
 
+  int maxVol, currentVol;
+
   String _dBValueRealTime; //realtime dB value when recording
 
   List<double> dBValueList; //array of realtime values for chosen time frame
   int arrLength; //length of array based on time frame and persec value
+
+  FlutterLocalNotificationsPlugin fltrNotification;
 
   @override
   void initState() {
@@ -59,12 +65,59 @@ class _HomeScreenState extends State<HomeScreen> {
     _noiseMeter = new NoiseMeter();
     _isRecording = false;
     arrLength = 0;
+    audioManager = AudioManager.STREAM_MUSIC;
+    initAudioStreamType();
+    updateVolumes();
+
+    //Notification init
+    var androidInitilize = new AndroidInitializationSettings('app_icon');
+    var iOSinitilize = new IOSInitializationSettings();
+    var initializationSettings = new InitializationSettings(
+        android: androidInitilize, iOS: iOSinitilize);
+    fltrNotification = new FlutterLocalNotificationsPlugin();
+    fltrNotification.initialize(initializationSettings,
+        onSelectNotification: notificationSelected);
   }
 
   @override
   void dispose() {
     super.dispose();
     controller.dispose();
+  }
+
+  Future notificationSelected(String payload) async {
+    //await Navigator.pushNamed(context, '/');
+  }
+
+  Future _showNotification() async {
+    var androidDetails =
+        new AndroidNotificationDetails("Channel ID", "Snorty", "Microphone On");
+    var iOSdetails = new IOSNotificationDetails();
+    var generalNotificationDetails =
+        new NotificationDetails(android: androidDetails, iOS: iOSdetails);
+
+    await fltrNotification.show(
+        0, "Snorty", "Microphone On", generalNotificationDetails);
+  }
+
+  Future _hideNotification() async {
+    await fltrNotification.cancel(0);
+  }
+
+  Future<void> initAudioStreamType() async {
+    await Volume.controlVolume(AudioManager.STREAM_MUSIC);
+  }
+
+  updateVolumes() async {
+    maxVol = await Volume.getMaxVol;
+    currentVol = await Volume.getVol;
+    print(maxVol);
+    print(currentVol);
+    setState(() {});
+  }
+
+  setVol(int i) async {
+    await Volume.setVol(7, showVolumeUI: ShowVolumeUI.HIDE);
   }
 
   //Sets a timer of how often to write dB value to array based on chosen persec value
@@ -122,12 +175,15 @@ class _HomeScreenState extends State<HomeScreen> {
           } else if (_activeTimeoutUnit == 'hr') {
             _activeTimeoutValue *= 3600;
           }
-          _activeAudioVolumeValue = prefs.getInt("audiovolumeValue") ?? 100;
+          _activeAudioVolumeValue = prefs.getInt("audiovolumeValue") ?? 70;
+          print(_activeAudioVolumeValue);
           _activeAudioFile1 = prefs.getString("audioname1Value") ?? '';
           _activeAudioFile2 = prefs.getString("audioname2Value") ?? '';
           _activeAudioFile3 = prefs.getString("audioname3Value") ?? '';
+          setVol(_activeAudioVolumeValue);
           arrLength = (_activePerSecValue * _activeTimeSampleValue).floor();
           dBValueList = new List<double>();
+          _showNotification();
         });
         getdBData(); //Calls function to start persec timer
       }
@@ -146,6 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
       timer.cancel(); //Stops timer that's adding dB values to array
       stopAudio(); //Stops audio alert if playing
       dBValueList.clear(); //Clears/Resets array of realtime dB values
+      _hideNotification(); //Clears mic on notification
       this.setState(() {
         this._isRecording = false;
         this._timeLastAudioPlayed = 0;
