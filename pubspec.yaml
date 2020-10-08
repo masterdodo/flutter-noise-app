@@ -65,6 +65,10 @@ flutter:
   assets:
     - lang/en.json
     - lang/sl.json
+    - assets/audio/Bleep.mp3
+    - assets/audio/Censor-beep-3.mp3
+    - assets/audio/Foghorn.mp3
+    - assets/audio/Grocery-Scanning.mp3
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
