@@ -90,8 +90,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future _showNotification() async {
-    var androidDetails =
-        new AndroidNotificationDetails("Channel ID", "Snorty", "Microphone On");
+    var androidDetails = new AndroidNotificationDetails(
+        "Channel ID", "Snorty", "Microphone On",
+        ongoing: true, enableVibration: false);
     var iOSdetails = new IOSNotificationDetails();
     var generalNotificationDetails =
         new NotificationDetails(android: androidDetails, iOS: iOSdetails);

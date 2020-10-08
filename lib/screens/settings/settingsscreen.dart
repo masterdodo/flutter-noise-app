@@ -41,6 +41,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _currentAudioVolumeValue,
       _currentTimeoutValue = 0;
 
+  bool _advancedSettings = false;
+
   String _persecUnit = "sec";
   String _timesampleUnit = "sec";
   String _timeoutUnit = "sec";
@@ -201,124 +203,175 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(children: [
-            Container(
-              margin: EdgeInsets.only(bottom: 20),
-              padding: EdgeInsets.all(5),
-              decoration: sliderBoxDecoration(),
+            dBTreshold(context),
+            Visibility(
               child: Column(
                 children: [
-                  Text(
-                      AppLocalizations.of(context)
-                          .translate('db_treshold_string'),
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  dBTresholdSliderControl(30, 150),
+                  perSec(context),
+                  timeFrame(context),
+                  timeout(context),
                 ],
               ),
+              visible: _advancedSettings,
             ),
-            Container(
-              margin: EdgeInsets.only(bottom: 20),
-              padding: EdgeInsets.all(5),
-              decoration: sliderBoxDecoration(),
-              child: Column(
-                children: [
-                  Text(AppLocalizations.of(context).translate('per_sec_string'),
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  perSecSliderControl(1, 60),
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(bottom: 20),
-              padding: EdgeInsets.all(5),
-              decoration: sliderBoxDecoration(),
-              child: Column(
-                children: [
-                  Text(
-                      AppLocalizations.of(context)
-                          .translate('time_frame_string'),
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  timeSampleSliderControl(1, 60),
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(bottom: 20),
-              padding: EdgeInsets.all(5),
-              decoration: sliderBoxDecoration(),
-              child: Column(
-                children: [
-                  Text(AppLocalizations.of(context).translate('timeout_string'),
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  timeoutSliderControl(1, 60),
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(bottom: 20),
-              padding: EdgeInsets.all(5),
-              decoration: sliderBoxDecoration(),
-              child: Column(
-                children: [
-                  Text(
-                      AppLocalizations.of(context)
-                          .translate('sound_volume_string'),
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  audioVolumeSliderControl(1, 100),
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(bottom: 20),
-              padding: EdgeInsets.all(5),
-              decoration: sliderBoxDecoration(),
-              child: Column(
-                children: [
-                  Text(
-                    AppLocalizations.of(context).translate('audio_string'),
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  audioChooseControl1(),
-                  AbsorbPointer(
-                    absorbing: !(_currentAudioName1 != audioString),
-                    child: Opacity(
-                        opacity: (_currentAudioName1 != audioString) ? 1 : 0.3,
-                        child: audioChooseControl2()),
-                  ),
-                  AbsorbPointer(
-                    absorbing: !(_currentAudioName1 != audioString &&
-                        _currentAudioName2 != audioString),
-                    child: Opacity(
-                        opacity: (_currentAudioName1 != audioString &&
-                                _currentAudioName2 != audioString)
-                            ? 1
-                            : 0.3,
-                        child: audioChooseControl3()),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              child: RaisedButton(
-                onPressed: () => resetSettingsValues(),
-                color: Colors.white,
-                child: Text(AppLocalizations.of(context)
-                    .translate('default_settings_string')),
-              ),
-            ),
-            Builder(builder: (BuildContext context) {
-              return RaisedButton(
-                  color: Colors.greenAccent[100],
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30)),
-                  onPressed: () => saveSettingsValues(context),
-                  child: Text(
-                    AppLocalizations.of(context).translate('save_string'),
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ));
-            })
+            soundVolume(context),
+            audio(context),
+            advancedSettings(context),
+            defaultSettings(context),
+            saveSettingsBuilder()
           ]),
         ),
+      ),
+    );
+  }
+
+  Container advancedSettings(BuildContext context) {
+    return Container(
+      child: RaisedButton(
+        onPressed: () {
+          setState(() {
+            _advancedSettings = !_advancedSettings;
+          });
+        },
+        color: Colors.blue,
+        child: _advancedSettings
+            ? Text(AppLocalizations.of(context).translate('close_string'))
+            : Text(AppLocalizations.of(context)
+                .translate('advanced_settings_string')),
+      ),
+    );
+  }
+
+  Builder saveSettingsBuilder() {
+    return Builder(builder: (BuildContext context) {
+      return RaisedButton(
+          color: Colors.greenAccent[100],
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          onPressed: () => saveSettingsValues(context),
+          child: Text(
+            AppLocalizations.of(context).translate('save_string'),
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ));
+    });
+  }
+
+  Container defaultSettings(BuildContext context) {
+    return Container(
+      child: RaisedButton(
+        onPressed: () => resetSettingsValues(),
+        color: Colors.white,
+        child: Text(
+            AppLocalizations.of(context).translate('default_settings_string')),
+      ),
+    );
+  }
+
+  Container audio(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 20),
+      padding: EdgeInsets.all(5),
+      decoration: sliderBoxDecoration(),
+      child: Column(
+        children: [
+          Text(
+            AppLocalizations.of(context).translate('audio_string'),
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          audioChooseControl1(),
+          AbsorbPointer(
+            absorbing: !(_currentAudioName1 != audioString),
+            child: Opacity(
+                opacity: (_currentAudioName1 != audioString) ? 1 : 0.3,
+                child: audioChooseControl2()),
+          ),
+          AbsorbPointer(
+            absorbing: !(_currentAudioName1 != audioString &&
+                _currentAudioName2 != audioString),
+            child: Opacity(
+                opacity: (_currentAudioName1 != audioString &&
+                        _currentAudioName2 != audioString)
+                    ? 1
+                    : 0.3,
+                child: audioChooseControl3()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Container soundVolume(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 20),
+      padding: EdgeInsets.all(5),
+      decoration: sliderBoxDecoration(),
+      child: Column(
+        children: [
+          Text(AppLocalizations.of(context).translate('sound_volume_string'),
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          audioVolumeSliderControl(1, 100),
+        ],
+      ),
+    );
+  }
+
+  Container timeout(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 20),
+      padding: EdgeInsets.all(5),
+      decoration: sliderBoxDecoration(),
+      child: Column(
+        children: [
+          Text(AppLocalizations.of(context).translate('timeout_string'),
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          timeoutSliderControl(1, 60),
+        ],
+      ),
+    );
+  }
+
+  Container timeFrame(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 20),
+      padding: EdgeInsets.all(5),
+      decoration: sliderBoxDecoration(),
+      child: Column(
+        children: [
+          Text(AppLocalizations.of(context).translate('time_frame_string'),
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          timeSampleSliderControl(1, 60),
+        ],
+      ),
+    );
+  }
+
+  Container perSec(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 20),
+      padding: EdgeInsets.all(5),
+      decoration: sliderBoxDecoration(),
+      child: Column(
+        children: [
+          Text(AppLocalizations.of(context).translate('per_sec_string'),
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          perSecSliderControl(1, 60),
+        ],
+      ),
+    );
+  }
+
+  Container dBTreshold(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 20),
+      padding: EdgeInsets.all(5),
+      decoration: sliderBoxDecoration(),
+      child: Column(
+        children: [
+          Text(AppLocalizations.of(context).translate('db_treshold_string'),
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          dBTresholdSliderControl(30, 150),
+        ],
       ),
     );
   }
@@ -491,7 +544,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: TextField(
             controller: TextEditingController(text: _currentDbValue.toString()),
             decoration:
-                InputDecoration(border: InputBorder.none, hintText: 'dB'),
+                InputDecoration(border: InputBorder.none, hintText: '0'),
             onChanged: (String text) {
               if (double.parse(text) >= minVal &&
                   double.parse(text) <= maxVal) {
@@ -502,6 +555,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
         ),
+        Container(
+            child: Text(
+          "dB",
+          style: TextStyle(
+            fontSize: 18,
+          ),
+        ))
       ],
     );
   }
@@ -529,7 +589,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             controller:
                 TextEditingController(text: _currentPerSecValue.toString()),
             decoration:
-                InputDecoration(border: InputBorder.none, hintText: 'dB'),
+                InputDecoration(border: InputBorder.none, hintText: '0'),
             onChanged: (String text) {
               if (double.parse(text) >= minVal &&
                   double.parse(text) <= maxVal) {
@@ -592,7 +652,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             controller:
                 TextEditingController(text: _currentTimeSampleValue.toString()),
             decoration:
-                InputDecoration(border: InputBorder.none, hintText: 'dB'),
+                InputDecoration(border: InputBorder.none, hintText: '0'),
             onChanged: (String text) {
               if (double.parse(text) >= minVal &&
                   double.parse(text) <= maxVal) {
@@ -655,7 +715,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             controller:
                 TextEditingController(text: _currentTimeoutValue.toString()),
             decoration:
-                InputDecoration(border: InputBorder.none, hintText: 'dB'),
+                InputDecoration(border: InputBorder.none, hintText: '0'),
             onChanged: (String text) {
               if (double.parse(text) >= minVal &&
                   double.parse(text) <= maxVal) {
@@ -717,7 +777,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             controller: TextEditingController(
                 text: _currentAudioVolumeValue.toString()),
             decoration:
-                InputDecoration(border: InputBorder.none, hintText: 'dB'),
+                InputDecoration(border: InputBorder.none, hintText: '0'),
             onChanged: (String text) {
               if (double.parse(text) >= minVal &&
                   double.parse(text) <= maxVal) {

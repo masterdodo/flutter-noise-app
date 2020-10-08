@@ -18,5 +18,7 @@
     "help_string": "Help",
     "about_string": "About",
     "exit_string": "Exit",
-    "default_settings_string": "Default Settings"
+    "default_settings_string": "Default Settings",
+    "advanced_settings_string": "Advanced Settings",
+    "close_string": "Close"
 }

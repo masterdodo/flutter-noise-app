@@ -18,5 +18,7 @@
     "help_string": "Pomoč",
     "about_string": "O nas",
     "exit_string": "Izhod",
-    "default_settings_string": "Tovarniške nastavitve"
+    "default_settings_string": "Tovarniške nastavitve",
+    "advanced_settings_string": "Dodatne nastavitve",
+    "close_string": "Zapri"
 }
