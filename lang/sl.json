@@ -2,11 +2,17 @@
     "main_string": "Snorty",
     "settings_string": "Nastavitve",
     "db_treshold_string": "Občutljivost mikrofona",
+    "db_treshold_help_string": "Nastavi/prilagodi prag zvočnega senzorja/mikrofona.",
     "per_sec_string": "Vzorčenje mikrofona",
+    "per_sec_help_string": "Nastavi kolikokrat na čas.enoto preveri glasnost hrupa.",
     "time_frame_string": "Časovni interval vzorčenja",
+    "time_frame_help_string": "Nastavi interval za izračun povprečnega hrupa.",
     "timeout_string": "Zakasnitev po predvajanju",
+    "timeout_help_string": "Zakasnitev po predvajanem zvoku.",
     "audio_string": "Izberite zvok za predvajanje",
+    "audio_help_string": "Izberite zvok za predvajanje ali uporabite svojo zvočno datoteko.",
     "sound_volume_string": "Glasnost zvoka",
+    "sound_volume_help_string": "Nastavi glasnost predvajanega zvoka.",
     "save_string": "Shrani Nastavitve",
     "choose_sound_string": "Izberi zvočno datoteko...",
     "menu_home_string": "Domov",
@@ -20,5 +26,7 @@
     "exit_string": "Izhod",
     "default_settings_string": "Tovarniške nastavitve",
     "advanced_settings_string": "Dodatne nastavitve",
-    "close_string": "Zapri"
+    "close_string": "Zapri",
+    "help_intro_string": "Lahko uporabite prednastavljene vrednosti ali jih prilagodite po svojih željah.",
+    "on_off_string": "Pritisni gumb za Vklop/Izklop."
 }

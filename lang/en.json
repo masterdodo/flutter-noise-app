@@ -2,11 +2,17 @@
     "main_string": "Snorty",
     "settings_string": "Settings",
     "db_treshold_string": "Mic Sensitivity",
+    "db_treshold_help_string": "Sets/adjusts the threshold of the sound sensor/microphone.",
     "per_sec_string": "Microphone sampling",
+    "per_sec_help_string": "Sets how many times per unit time it checks the noise level.",
     "time_frame_string": "Sampling time interval",
+    "time_frame_help_string": "Sets the interval for calculating the average noise.",
     "timeout_string": "Delay after playback",
+    "timeout_help_string": "Delay after the sound is played.",
     "audio_string": "Select sound to play",
+    "audio_help_string": "Select a sound to play or use your own audio file.",
     "sound_volume_string": "Audio volume",
+    "sound_volume_help_string": "Adjusts the volume of the playback sound.",
     "save_string": "Save Settings",
     "choose_sound_string": "Choose audio file...",
     "menu_home_string": "Home",
@@ -20,5 +26,7 @@
     "exit_string": "Exit",
     "default_settings_string": "Default Settings",
     "advanced_settings_string": "Advanced Settings",
-    "close_string": "Close"
+    "close_string": "Close",
+    "help_intro_string": "You can use the preset values or adjust them to your liking.",
+    "on_off_string": "Press the On / Off button."
 }

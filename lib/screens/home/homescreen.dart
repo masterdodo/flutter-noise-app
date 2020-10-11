@@ -118,7 +118,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   setVol(int i) async {
-    await Volume.setVol(7, showVolumeUI: ShowVolumeUI.HIDE);
+    int _setVol = (this.maxVol * (i / 100)).round();
+    print(_setVol);
+    await Volume.setVol(_setVol, showVolumeUI: ShowVolumeUI.SHOW);
   }
 
   //Sets a timer of how often to write dB value to array based on chosen persec value
