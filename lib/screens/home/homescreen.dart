@@ -22,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   NoiseMeter _noiseMeter; //getting dB values from mic
   AudioPlayer audioPlayer; //audio alert player
   AudioManager audioManager;
-  final asset_player = AudioCache();
+  final assetPlayer = AudioCache();
 
   final audioString = "Choose audio file...";
   Duration duration;
@@ -60,6 +60,13 @@ class _HomeScreenState extends State<HomeScreen> {
   int arrLength; //length of array based on time frame and persec value
 
   FlutterLocalNotificationsPlugin fltrNotification;
+
+  Map<String, int> _defaultSounds = {
+    "audio/Bleep.mp3": 2,
+    "audio/Censor-beep-3.mp3": 1,
+    "audio/Foghorn.mp3": 5,
+    "audio/Grocery-Scanning.mp3": 4
+  };
 
   @override
   void initState() {
@@ -99,12 +106,12 @@ class _HomeScreenState extends State<HomeScreen> {
     _activeTimeoutValue = prefs.getInt("timeoutValue") ?? 6;
     _activeTimeoutUnit = prefs.getString("timeoutUnit") ?? 'sec';
     _activeAudioVolumeValue = prefs.getInt("audiovolumeValue") ?? 70;
-    _activeAudioFile1 = prefs.getString("audioname1Value") ??
-        'assets/audio/Grocery-Scanning.mp3';
+    _activeAudioFile1 =
+        prefs.getString("audioname1Value") ?? 'audio/Grocery-Scanning.mp3';
     _activeAudioFile2 =
-        prefs.getString("audioname2Value") ?? 'assets/audio/Foghorn.mp3';
-    _activeAudioFile3 = prefs.getString("audioname3Value") ??
-        'assets/audio/Grocery-Scanning.mp3';
+        prefs.getString("audioname2Value") ?? 'audio/Foghorn.mp3';
+    _activeAudioFile3 =
+        prefs.getString("audioname3Value") ?? 'audio/Grocery-Scanning.mp3';
 
     prefs.setInt("dbValue", _activeDbValue);
     prefs.setInt("persecValue", _activePerSecValue);
@@ -216,8 +223,8 @@ class _HomeScreenState extends State<HomeScreen> {
           } else if (_activeTimeoutUnit == 'hr') {
             _activeTimeoutValue *= 3600;
           }
-          _activeAudioVolumeValue = prefs.getInt("audiovolumeValue") ?? 70;
-          print(_activeAudioVolumeValue);
+          //_activeAudioVolumeValue = prefs.getInt("audiovolumeValue") ?? 70;
+          //print(_activeAudioVolumeValue);
           _activeAudioFile1 = prefs.getString("audioname1Value") ?? '';
           _activeAudioFile2 = prefs.getString("audioname2Value") ?? '';
           _activeAudioFile3 = prefs.getString("audioname3Value") ?? '';
@@ -255,16 +262,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //Play audio file
   void playAudio() async {
-    if (_activeAudioFile1.split('/')[0] != 'assets') {
+    print("playAudio");
+    print(_activeAudioFile1);
+    print(_defaultSounds);
+    if (_defaultSounds.containsKey(_activeAudioFile1)) {
+      print("IFF");
+      await assetPlayer.play(_activeAudioFile1);
+      setState(() =>
+          duration = Duration(seconds: _defaultSounds[_activeAudioFile1]));
+    } else {
+      print("ELSE");
       await audioPlayer.play(_activeAudioFile1, isLocal: true);
       audioPlayer.onDurationChanged.listen((Duration d) {
         print('Max duration: $d');
         setState(() => duration = d);
       });
-    } else {
-      await asset_player.play(_activeAudioFile1.substring(
-          _activeAudioFile1.indexOf('/'), _activeAudioFile1.length));
-      //DUration SHIT
     }
   }
 
@@ -282,24 +294,94 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text(AppLocalizations.of(context).translate('main_string')),
       ),
       body: Center(
-        child: RaisedButton(
-          padding: EdgeInsets.all(65),
-          color: _isRecording ? Colors.red : Colors.green,
-          shape: CircleBorder(),
-          onPressed: _isRecording ? this.stop : () => this.start(context),
-          child: _isRecording
-              ? Icon(
-                  Icons.stop,
-                  color: Colors.white,
-                  size: 50,
-                )
-              : Icon(
-                  Icons.mic,
-                  color: Colors.white,
-                  size: 50,
-                ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            RaisedButton(
+              padding: EdgeInsets.all(65),
+              color: _isRecording ? Colors.red : Colors.green,
+              shape: CircleBorder(),
+              onPressed: _isRecording ? this.stop : () => this.start(context),
+              child: _isRecording
+                  ? Icon(
+                      Icons.stop,
+                      color: Colors.white,
+                      size: 50,
+                    )
+                  : Icon(
+                      Icons.mic,
+                      color: Colors.white,
+                      size: 50,
+                    ),
+            ),
+            Divider(
+              color: Colors.transparent,
+            ),
+            AbsorbPointer(absorbing: _isRecording, child: soundVolume(context))
+          ],
         ),
       ),
+    );
+  }
+
+  Container soundVolume(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 20),
+      padding: EdgeInsets.all(5),
+      child: Column(
+        children: [
+          Text(AppLocalizations.of(context).translate('sound_volume_string'),
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          audioVolumeSliderControl(1, 100),
+        ],
+      ),
+    );
+  }
+
+  Row audioVolumeSliderControl(double minVal, double maxVal) {
+    return Row(
+      children: [
+        Flexible(
+          child: Slider(
+              activeColor: (_isRecording) ? Colors.grey[300] : Colors.blue,
+              inactiveColor:
+                  (_isRecording) ? Colors.grey[300] : Colors.blue[100],
+              min: minVal,
+              max: maxVal,
+              divisions: (maxVal - minVal).round(),
+              value: _activeAudioVolumeValue.toDouble(),
+              label: _activeAudioVolumeValue.toString(),
+              onChanged: (double val) {
+                setState(() {
+                  _activeAudioVolumeValue = val.round();
+                });
+              }),
+        ),
+        Container(
+          width: 30,
+          child: TextField(
+            controller:
+                TextEditingController(text: _activeAudioVolumeValue.toString()),
+            decoration:
+                InputDecoration(border: InputBorder.none, hintText: '0'),
+            onChanged: (String text) {
+              if (double.parse(text) >= minVal &&
+                  double.parse(text) <= maxVal) {
+                setState(() {
+                  _activeAudioVolumeValue = int.parse(text);
+                });
+              }
+            },
+          ),
+        ),
+        Container(
+            child: Text(
+          "%",
+          style: TextStyle(
+            fontSize: 18,
+          ),
+        )),
+      ],
     );
   }
 
