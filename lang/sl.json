@@ -28,5 +28,10 @@
     "advanced_settings_string": "Dodatne nastavitve",
     "close_string": "Zapri",
     "help_intro_string": "Lahko uporabite prednastavljene vrednosti ali jih prilagodite po svojih željah.",
-    "on_off_string": "Pritisni gumb za Vklop/Izklop."
+    "on_off_string": "Vklop/Izklop",
+    "on_off_help_string": "Pritisni gumb za Vklop/Izklop.",
+    "share_string": "Odlična aplikacija, poglejte! https://www.google.com",
+    "hello_string": "Zdravo",
+    "email_title_string": "Snorty Podpora",
+    "email_string": "To e-poštno sporočilo je povezano z aplikacijo Snorty."
 }

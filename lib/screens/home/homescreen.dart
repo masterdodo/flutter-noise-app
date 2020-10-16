@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:volume/volume.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:audioplayers/audio_cache.dart';
+import 'package:share/share.dart';
 import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
@@ -20,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   NoiseMeter _noiseMeter; //getting dB values from mic
   AudioPlayer audioPlayer; //audio alert player
   AudioManager audioManager;
+  final asset_player = AudioCache();
 
   final audioString = "Choose audio file...";
   Duration duration;
@@ -63,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     audioPlayer = AudioPlayer();
     _noiseMeter = new NoiseMeter();
+    preferencesOnInit();
     _isRecording = false;
     arrLength = 0;
     audioManager = AudioManager.STREAM_MUSIC;
@@ -83,6 +87,36 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     super.dispose();
     controller.dispose();
+  }
+
+  Future preferencesOnInit() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _activeDbValue = prefs.getInt("dbValue") ?? 66;
+    _activePerSecValue = prefs.getInt("persecValue") ?? 5;
+    _activePerSecUnit = prefs.getString("persecUnit") ?? 'sec';
+    _activeTimeSampleValue = prefs.getInt("timesampleValue") ?? 1;
+    _activeTimeSampleUnit = prefs.getString("timesampleUnit") ?? 'sec';
+    _activeTimeoutValue = prefs.getInt("timeoutValue") ?? 6;
+    _activeTimeoutUnit = prefs.getString("timeoutUnit") ?? 'sec';
+    _activeAudioVolumeValue = prefs.getInt("audiovolumeValue") ?? 70;
+    _activeAudioFile1 = prefs.getString("audioname1Value") ??
+        'assets/audio/Grocery-Scanning.mp3';
+    _activeAudioFile2 =
+        prefs.getString("audioname2Value") ?? 'assets/audio/Foghorn.mp3';
+    _activeAudioFile3 = prefs.getString("audioname3Value") ??
+        'assets/audio/Grocery-Scanning.mp3';
+
+    prefs.setInt("dbValue", _activeDbValue);
+    prefs.setInt("persecValue", _activePerSecValue);
+    prefs.setString("persecUnit", _activePerSecUnit);
+    prefs.setInt("timesampleValue", _activeTimeSampleValue);
+    prefs.setString("timesampleUnit", _activeTimeSampleUnit);
+    prefs.setInt("timeoutValue", _activeTimeoutValue);
+    prefs.setString("timeoutUnit", _activeTimeoutUnit);
+    prefs.setInt("audiovolumeValue", _activeAudioVolumeValue);
+    prefs.setString("audioname1Value", _activeAudioFile1);
+    prefs.setString("audioname2Value", _activeAudioFile2);
+    prefs.setString("audioname3Value", _activeAudioFile3);
   }
 
   Future notificationSelected(String payload) async {
@@ -132,6 +166,10 @@ class _HomeScreenState extends State<HomeScreen> {
         dBProcessor(_dBValueRealTime);
       });
     });
+  }
+
+  void sendMail() {
+    Share.share(AppLocalizations.of(context).translate('share_string'));
   }
 
   //Listens to MIC(gets decibel data)
@@ -217,11 +255,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //Play audio file
   void playAudio() async {
-    await audioPlayer.play(_activeAudioFile1, isLocal: true);
-    audioPlayer.onDurationChanged.listen((Duration d) {
-      print('Max duration: $d');
-      setState(() => duration = d);
-    });
+    if (_activeAudioFile1.split('/')[0] != 'assets') {
+      await audioPlayer.play(_activeAudioFile1, isLocal: true);
+      audioPlayer.onDurationChanged.listen((Duration d) {
+        print('Max duration: $d');
+        setState(() => duration = d);
+      });
+    } else {
+      await asset_player.play(_activeAudioFile1.substring(
+          _activeAudioFile1.indexOf('/'), _activeAudioFile1.length));
+      //DUration SHIT
+    }
   }
 
   //Stops audio file

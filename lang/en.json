@@ -28,5 +28,10 @@
     "advanced_settings_string": "Advanced Settings",
     "close_string": "Close",
     "help_intro_string": "You can use the preset values or adjust them to your liking.",
-    "on_off_string": "Press the On / Off button."
+    "on_off_string": "On/Off",
+    "on_off_help_string": "Press the On/Off button.",
+    "share_string": "Great app, have a look! https://www.google.com",
+    "hello_string": "Hello",
+    "email_title_string": "Snorty Support",
+    "email_string": "This email is related to the Snorty app."
 }
