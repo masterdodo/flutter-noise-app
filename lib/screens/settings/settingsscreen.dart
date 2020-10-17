@@ -39,7 +39,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _currentPerSecValue,
       _currentTimeSampleValue,
       _currentAudioVolumeValue,
-      _currentTimeoutValue = 0;
+      _currentTimeoutValue;
 
   bool _advancedSettings = false;
 
@@ -467,10 +467,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _timeoutUnit = "sec";
       _currentAudioName1 = "audio/Grocery-Scanning.mp3";
       _currentAudioName2 = "audio/Foghorn.mp3";
-      _currentAudioName3 = "audio/Grocery-Scanning.mp3";
+      _currentAudioName3 = "audio/Censor-beep-3.mp3";
       _currentAudioVolumeValue = 70;
     });
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    /*SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setInt("dbValue", _currentDbValue);
     prefs.setInt("persecValue", _currentPerSecValue);
     prefs.setString("persecUnit", _persecUnit);
@@ -481,7 +481,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     prefs.setInt("audiovolumeValue", _currentAudioVolumeValue);
     prefs.setString("audioname1Value", _currentAudioName1);
     prefs.setString("audioname2Value", _currentAudioName2);
-    prefs.setString("audioname3Value", _currentAudioName3);
+    prefs.setString("audioname3Value", _currentAudioName3);*/
   }
 
   @override
@@ -510,9 +510,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             soundVolume(context),
             audio(context),
-            advancedSettings(context),
-            defaultSettings(context),
-            saveSettingsBuilder()
+            Visibility(
+              child: defaultSettings(context),
+              visible: _advancedSettings,
+            ),
+            saveSettingsBuilder(),
+            Visibility(
+              child: advancedSettings(context),
+              visible: !_advancedSettings,
+            ),
           ]),
         ),
       ),
@@ -527,12 +533,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _advancedSettings = !_advancedSettings;
           });
         },
-        color: Colors.blue,
+        color: Colors.blue[50],
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         child: _advancedSettings
-            ? Text(AppLocalizations.of(context).translate('close_string'))
-            : Text(AppLocalizations.of(context)
-                .translate('advanced_settings_string')),
+            ? Text(
+                AppLocalizations.of(context).translate('close_string'),
+                style: TextStyle(fontWeight: FontWeight.bold),
+              )
+            : Text(
+                AppLocalizations.of(context)
+                    .translate('advanced_settings_string'),
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
       ),
+    );
+  }
+
+  showAlertDialogOnSave(BuildContext context) {
+    // set up the buttons
+    Widget saveButton = FlatButton(
+      child: Text("Save"),
+      onPressed: () {
+        Navigator.of(context).pop();
+        saveSettingsValues(context);
+      },
+    );
+    Widget cancelButton = FlatButton(
+      child: Text("Cancel"),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    ); // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Saving"),
+      content: Text("Are you sure you want to save this settings?"),
+      actions: [
+        saveButton,
+        cancelButton,
+      ],
+    ); // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
     );
   }
 
@@ -543,7 +588,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           padding: EdgeInsets.symmetric(horizontal: 20),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-          onPressed: () => saveSettingsValues(context),
+          onPressed: () => showAlertDialogOnSave(context),
           child: Text(
             AppLocalizations.of(context).translate('save_string'),
             style: TextStyle(fontWeight: FontWeight.bold),
@@ -555,9 +600,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       child: RaisedButton(
         onPressed: () => resetSettingsValues(),
-        color: Colors.white,
+        color: Colors.blue[50],
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         child: Text(
-            AppLocalizations.of(context).translate('default_settings_string')),
+          AppLocalizations.of(context).translate('default_settings_string'),
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -691,26 +740,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // Widget for audio chooser 1
   Row audioChooseControl1() {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          width: 40,
-          height: 50,
-          child: IconButton(
-            icon: Icon(
-              Icons.delete,
-              color: (_currentAudioName3 == audioString &&
-                      _currentAudioName2 == audioString &&
-                      _currentAudioName1 != audioString)
-                  ? Colors.red
-                  : Colors.grey,
-            ),
-            onPressed: (_currentAudioName3 == audioString &&
-                    _currentAudioName2 == audioString &&
-                    _currentAudioName1 != audioString)
-                ? () => removeAudio1()
-                : null,
-          ),
-        ),
         Container(
           width: 40,
           height: 50,
@@ -722,12 +753,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Flexible(
           child: GestureDetector(
             onTap: () => showAlertDialog1(context),
-            child: Text(_currentAudioName1 != audioString
+            child: Text((_currentAudioName1 != audioString &&
+                    _currentAudioName1 != null)
                 ? (_currentAudioName1
                     .split("/")[_currentAudioName1.split("/").length - 1])
                 : AppLocalizations.of(context)
                     .translate('choose_sound_string')),
           ),
+        ),
+        Container(
+          width: 40,
+          height: 50,
+          child: Text(""),
         )
       ],
     );
@@ -736,7 +773,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
 // Widget for audio chooser 2
   Row audioChooseControl2() {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        Container(
+          width: 40,
+          height: 50,
+          child: IconButton(
+            icon: Icon(Icons.file_upload),
+            onPressed: () => showAlertDialog2(context),
+          ),
+        ),
+        Flexible(
+          child: GestureDetector(
+            onTap: () => showAlertDialog2(context),
+            child: Text((_currentAudioName2 != audioString &&
+                    _currentAudioName2 != null)
+                ? (_currentAudioName2
+                    .split("/")[_currentAudioName2.split("/").length - 1])
+                : AppLocalizations.of(context)
+                    .translate('choose_sound_string')),
+          ),
+        ),
         Container(
           width: 40,
           height: 50,
@@ -753,24 +810,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ? () => removeAudio2()
                 : null,
           ),
-        ),
-        Container(
-          width: 40,
-          height: 50,
-          child: IconButton(
-            icon: Icon(Icons.file_upload),
-            onPressed: () => showAlertDialog2(context),
-          ),
-        ),
-        Flexible(
-          child: GestureDetector(
-            onTap: () => showAlertDialog2(context),
-            child: Text(_currentAudioName2 != audioString
-                ? (_currentAudioName2
-                    .split("/")[_currentAudioName2.split("/").length - 1])
-                : AppLocalizations.of(context)
-                    .translate('choose_sound_string')),
-          ),
         )
       ],
     );
@@ -779,7 +818,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // Widget for audio chooser 3
   Row audioChooseControl3() {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        Container(
+          width: 40,
+          height: 50,
+          child: IconButton(
+            icon: Icon(Icons.file_upload),
+            onPressed: () => showAlertDialog3(context),
+          ),
+        ),
+        Flexible(
+          child: GestureDetector(
+              onTap: () => showAlertDialog3(context),
+              child: Text((_currentAudioName3 != audioString &&
+                      _currentAudioName3 != null)
+                  ? (_currentAudioName3
+                      .split("/")[_currentAudioName3.split("/").length - 1])
+                  : AppLocalizations.of(context)
+                      .translate('choose_sound_string'))),
+        ),
         Container(
           width: 40,
           height: 50,
@@ -794,24 +852,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ? () => removeAudio3()
                 : null,
           ),
-        ),
-        Container(
-          width: 40,
-          height: 50,
-          child: IconButton(
-            icon: Icon(Icons.file_upload),
-            onPressed: () => showAlertDialog3(context),
-          ),
-        ),
-        Flexible(
-          child: GestureDetector(
-              onTap: () => showAlertDialog3(context),
-              child: Text(_currentAudioName3 != audioString
-                  ? (_currentAudioName3
-                      .split("/")[_currentAudioName3.split("/").length - 1])
-                  : AppLocalizations.of(context)
-                      .translate('choose_sound_string'))),
-        ),
+        )
       ],
     );
   }
@@ -825,8 +866,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               min: minVal,
               max: maxVal,
               divisions: (maxVal - minVal).round(),
-              value: _currentDbValue.toDouble(),
-              label: _currentDbValue.toString(),
+              value: _currentDbValue?.toDouble() ?? 66,
+              label: _currentDbValue?.toString() ?? '66',
               onChanged: (double val) {
                 setState(() {
                   _currentDbValue = val.round();
@@ -869,8 +910,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               min: minVal,
               max: maxVal,
               divisions: (maxVal - minVal).round(),
-              value: _currentPerSecValue.toDouble(),
-              label: _currentPerSecValue.toString(),
+              value: _currentPerSecValue?.toDouble() ?? 5,
+              label: _currentPerSecValue?.toString() ?? '5',
               onChanged: (double val) {
                 setState(() {
                   _currentPerSecValue = val.round();
@@ -932,8 +973,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               min: minVal,
               max: maxVal,
               divisions: (maxVal - minVal).round(),
-              value: _currentTimeSampleValue.toDouble(),
-              label: _currentTimeSampleValue.toString(),
+              value: _currentTimeSampleValue?.toDouble() ?? 1,
+              label: _currentTimeSampleValue?.toString() ?? '1',
               onChanged: (double val) {
                 setState(() {
                   _currentTimeSampleValue = val.round();
@@ -995,8 +1036,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               min: minVal,
               max: maxVal,
               divisions: (maxVal - minVal).round(),
-              value: _currentTimeoutValue.toDouble(),
-              label: _currentTimeoutValue.toString(),
+              value: _currentTimeoutValue?.toDouble() ?? 6,
+              label: _currentTimeoutValue?.toString() ?? '6',
               onChanged: (double val) {
                 setState(() {
                   _currentTimeoutValue = val.round();
@@ -1057,8 +1098,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               min: minVal,
               max: maxVal,
               divisions: (maxVal - minVal).round(),
-              value: _currentAudioVolumeValue.toDouble(),
-              label: _currentAudioVolumeValue.toString(),
+              value: _currentAudioVolumeValue?.toDouble() ?? 70,
+              label: _currentAudioVolumeValue?.toString() ?? '70',
               onChanged: (double val) {
                 setState(() {
                   _currentAudioVolumeValue = val.round();

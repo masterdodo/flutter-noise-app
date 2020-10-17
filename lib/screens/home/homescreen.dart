@@ -71,6 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    dBValueList = [];
     audioPlayer = AudioPlayer();
     _noiseMeter = new NoiseMeter();
     preferencesOnInit();
@@ -111,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _activeAudioFile2 =
         prefs.getString("audioname2Value") ?? 'audio/Foghorn.mp3';
     _activeAudioFile3 =
-        prefs.getString("audioname3Value") ?? 'audio/Grocery-Scanning.mp3';
+        prefs.getString("audioname3Value") ?? 'audio/Censor-beep-3.mp3';
 
     prefs.setInt("dbValue", _activeDbValue);
     prefs.setInt("persecValue", _activePerSecValue);
@@ -133,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future _showNotification() async {
     var androidDetails = new AndroidNotificationDetails(
         "Channel ID", "Snorty", "Microphone On",
-        ongoing: true, enableVibration: false);
+        ongoing: true, enableVibration: false, playSound: false);
     var iOSdetails = new IOSNotificationDetails();
     var generalNotificationDetails =
         new NotificationDetails(android: androidDetails, iOS: iOSdetails);
@@ -153,15 +154,12 @@ class _HomeScreenState extends State<HomeScreen> {
   updateVolumes() async {
     maxVol = await Volume.getMaxVol;
     currentVol = await Volume.getVol;
-    print(maxVol);
-    print(currentVol);
     setState(() {});
   }
 
   setVol(int i) async {
     int _setVol = (this.maxVol * (i / 100)).round();
-    print(_setVol);
-    await Volume.setVol(_setVol, showVolumeUI: ShowVolumeUI.SHOW);
+    await Volume.setVol(_setVol, showVolumeUI: ShowVolumeUI.HIDE);
   }
 
   //Sets a timer of how often to write dB value to array based on chosen persec value
@@ -212,7 +210,6 @@ class _HomeScreenState extends State<HomeScreen> {
           _activeTimeSampleUnit = prefs.getString("timesampleUnit") ?? 'sec';
           if (_activeTimeSampleUnit == 'min') {
             _activeTimeSampleValue *= 60;
-            print(_activeTimeSampleValue);
           } else if (_activeTimeSampleUnit == 'hr') {
             _activeTimeSampleValue *= 3600;
           }
@@ -223,8 +220,6 @@ class _HomeScreenState extends State<HomeScreen> {
           } else if (_activeTimeoutUnit == 'hr') {
             _activeTimeoutValue *= 3600;
           }
-          //_activeAudioVolumeValue = prefs.getInt("audiovolumeValue") ?? 70;
-          //print(_activeAudioVolumeValue);
           _activeAudioFile1 = prefs.getString("audioname1Value") ?? '';
           _activeAudioFile2 = prefs.getString("audioname2Value") ?? '';
           _activeAudioFile3 = prefs.getString("audioname3Value") ?? '';
@@ -262,19 +257,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //Play audio file
   void playAudio() async {
-    print("playAudio");
-    print(_activeAudioFile1);
-    print(_defaultSounds);
     if (_defaultSounds.containsKey(_activeAudioFile1)) {
-      print("IFF");
       await assetPlayer.play(_activeAudioFile1);
       setState(() =>
           duration = Duration(seconds: _defaultSounds[_activeAudioFile1]));
     } else {
-      print("ELSE");
       await audioPlayer.play(_activeAudioFile1, isLocal: true);
       audioPlayer.onDurationChanged.listen((Duration d) {
-        print('Max duration: $d');
         setState(() => duration = d);
       });
     }
@@ -349,8 +338,8 @@ class _HomeScreenState extends State<HomeScreen> {
               min: minVal,
               max: maxVal,
               divisions: (maxVal - minVal).round(),
-              value: _activeAudioVolumeValue.toDouble(),
-              label: _activeAudioVolumeValue.toString(),
+              value: _activeAudioVolumeValue?.toDouble() ?? 70,
+              label: _activeAudioVolumeValue?.toString() ?? "70",
               onChanged: (double val) {
                 setState(() {
                   _activeAudioVolumeValue = val.round();
@@ -396,11 +385,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void dBProcessorAfterSound(text) {
-    if (dBValueList.length == arrLength) {
+    if (dBValueList?.length == arrLength) {
       dBValueList.removeAt(0);
     }
     dBValueList.add(double.parse(text));
-    if (dBValueList.length == arrLength) {
+    if (dBValueList?.length == arrLength) {
       double avg = 0;
       for (double x in dBValueList) {
         avg += x;
