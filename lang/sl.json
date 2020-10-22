@@ -33,5 +33,16 @@
     "share_string": "Odlična aplikacija, poglejte! https://www.google.com",
     "hello_string": "Zdravo",
     "email_title_string": "Snorty Podpora",
-    "email_string": "To e-poštno sporočilo je povezano z aplikacijo Snorty."
+    "email_string": "To e-poštno sporočilo je povezano z aplikacijo Snorty.",
+    "default_sounds_string": "Privzeti zvoki",
+    "choose_string": "Izberi...",
+    "cancel_string": "Prekliči",
+    "select_sound_string": "Izberi zvok",
+    "select_sound_desc_string": "Izberite 'Privzeti zvoki' za prednastavljene zvoke ali 'Izberi...', če hočete izbrati svoj zvok.",
+    "snackbar_save_success_string": "Nastavitve uspešno shranjene!",
+    "snackbar_save_fail_string": "Nastavitve niso shranjene!",
+    "save_1_string": "Shrani",
+    "save_dialog_desc_string": "Ste prepričani, da želite shraniti te nastavitve?",
+    "share_menu_string": "Deli",
+    "email_menu_string": "Pošlji nam E-pošto"
 }

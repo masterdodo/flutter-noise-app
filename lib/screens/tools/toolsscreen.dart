@@ -128,16 +128,10 @@ class _ToolsScreenState extends State<ToolsScreen> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.only(bottom: 15),
-                child: Row(
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)
-                          .translate('noise_meter_string'),
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                    ),
-                  ],
+                padding: const EdgeInsets.only(bottom: 15, top: 20),
+                child: Text(
+                  AppLocalizations.of(context).translate('noise_meter_string'),
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                 ),
               ),
               Row(
@@ -161,25 +155,22 @@ class _ToolsScreenState extends State<ToolsScreen> {
                   Text(
                     this.meanDb,
                     style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.normal,
+                      fontSize: 35,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 25, bottom: 20),
-                child: Row(
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)
-                          .translate('stopwatch_string'),
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                    )
-                  ],
-                ),
+              Divider(
+                color: Colors.transparent,
+                height: 20,
               ),
+              Padding(
+                  padding: const EdgeInsets.only(top: 25, bottom: 20),
+                  child: Text(
+                    AppLocalizations.of(context).translate('stopwatch_string'),
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  )),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [

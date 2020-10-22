@@ -110,14 +110,22 @@ class MyDrawer extends StatelessWidget {
                         AppLocalizations.of(context).translate('share_string'));
                   },
                   child: Row(
-                    children: [Icon(Icons.share), Text('Share')],
+                    children: [
+                      Icon(Icons.share),
+                      Text(AppLocalizations.of(context)
+                          .translate('share_menu_string'))
+                    ],
                   )),
               FlatButton(
                   onPressed: () {
                     sendMail(context);
                   },
                   child: Row(
-                    children: [Icon(Icons.email), Text('Send us Email')],
+                    children: [
+                      Icon(Icons.email),
+                      Text(AppLocalizations.of(context)
+                          .translate('email_menu_string'))
+                    ],
                   ))
             ],
           ),

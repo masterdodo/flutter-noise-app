@@ -11,7 +11,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final snackBarSuccessSettings = SnackBar(
+  /*final snackBarSuccessSettings = SnackBar(
     content: Text(
       "Settings saved successfully!",
       style: TextStyle(color: Colors.black),
@@ -27,7 +27,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ),
     backgroundColor: Colors.redAccent[400],
     duration: Duration(seconds: 2),
-  );
+  );*/
 
   final audioString = "Choose audio file...";
 
@@ -82,29 +82,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
   showAlertDialog1(BuildContext context) {
     // set up the buttons
     Widget assetsButton = FlatButton(
-      child: Text("Default Sounds"),
+      child:
+          Text(AppLocalizations.of(context).translate('default_sounds_string')),
       onPressed: () {
         Navigator.of(context).pop();
         showDefaultSoundDialog1(context);
       },
     );
     Widget localButton = FlatButton(
-      child: Text("Choose..."),
+      child: Text(AppLocalizations.of(context).translate('choose_string')),
       onPressed: () {
         Navigator.of(context).pop();
         openAudioPicker1();
       },
     );
     Widget cancelButton = FlatButton(
-      child: Text("Cancel"),
+      child: Text(AppLocalizations.of(context).translate('cancel_string')),
       onPressed: () {
         Navigator.of(context).pop();
       },
     ); // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: Text("Select a Sound"),
+      title:
+          Text(AppLocalizations.of(context).translate('select_sound_string')),
       content: Text(
-          "Choose 'Default Sounds' for preset alerts or 'Choose...' if you want to use your own sound."),
+          AppLocalizations.of(context).translate('select_sound_desc_string')),
       actions: [
         assetsButton,
         localButton,
@@ -201,29 +203,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
   showAlertDialog2(BuildContext context) {
     // set up the buttons
     Widget assetsButton = FlatButton(
-      child: Text("Default Sounds"),
+      child:
+          Text(AppLocalizations.of(context).translate('default_sounds_string')),
       onPressed: () {
         Navigator.of(context).pop();
         showDefaultSoundDialog2(context);
       },
     );
     Widget localButton = FlatButton(
-      child: Text("Choose..."),
+      child: Text(AppLocalizations.of(context).translate('choose_string')),
       onPressed: () {
         Navigator.of(context).pop();
         openAudioPicker2();
       },
     );
     Widget cancelButton = FlatButton(
-      child: Text("Cancel"),
+      child: Text(AppLocalizations.of(context).translate('cancel_string')),
       onPressed: () {
         Navigator.of(context).pop();
       },
     ); // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: Text("Select a Sound"),
+      title:
+          Text(AppLocalizations.of(context).translate('select_sound_string')),
       content: Text(
-          "Choose 'Default Sounds' for preset alerts or 'Choose...' if you want to use your own sound."),
+          AppLocalizations.of(context).translate('select_sound_desc_string')),
       actions: [
         assetsButton,
         localButton,
@@ -320,29 +324,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
   showAlertDialog3(BuildContext context) {
     // set up the buttons
     Widget assetsButton = FlatButton(
-      child: Text("Default Sounds"),
+      child:
+          Text(AppLocalizations.of(context).translate('default_sounds_string')),
       onPressed: () {
         Navigator.of(context).pop();
         showDefaultSoundDialog3(context);
       },
     );
     Widget localButton = FlatButton(
-      child: Text("Choose..."),
+      child: Text(AppLocalizations.of(context).translate('choose_string')),
       onPressed: () {
         Navigator.of(context).pop();
         openAudioPicker3();
       },
     );
     Widget cancelButton = FlatButton(
-      child: Text("Cancel"),
+      child: Text(AppLocalizations.of(context).translate('cancel_string')),
       onPressed: () {
         Navigator.of(context).pop();
       },
     ); // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: Text("Select a Sound"),
+      title:
+          Text(AppLocalizations.of(context).translate('select_sound_string')),
       content: Text(
-          "Choose 'Default Sounds' for preset alerts or 'Choose...' if you want to use your own sound."),
+          AppLocalizations.of(context).translate('select_sound_desc_string')),
       actions: [
         assetsButton,
         localButton,
@@ -438,7 +444,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void saveSettingsValues(context) async {
     if (_currentAudioName1 == audioString) {
-      Scaffold.of(context).showSnackBar(snackBarFailSettings);
+      Scaffold.of(context).showSnackBar(SnackBar(
+        content: Text(
+          AppLocalizations.of(context).translate('snackbar_save_fail_string'),
+          style: TextStyle(color: Colors.black),
+        ),
+        backgroundColor: Colors.redAccent[400],
+        duration: Duration(seconds: 2),
+      ));
     } else {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setInt("dbValue", _currentDbValue);
@@ -452,7 +465,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       prefs.setString("audioname1Value", _currentAudioName1);
       prefs.setString("audioname2Value", _currentAudioName2);
       prefs.setString("audioname3Value", _currentAudioName3);
-      Scaffold.of(context).showSnackBar(snackBarSuccessSettings);
+      Scaffold.of(context).showSnackBar(SnackBar(
+        content: Text(
+          AppLocalizations.of(context)
+              .translate('snackbar_save_success_string'),
+          style: TextStyle(color: Colors.black),
+        ),
+        backgroundColor: Colors.greenAccent[400],
+        duration: Duration(seconds: 2),
+      ));
     }
   }
 
@@ -514,11 +535,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: defaultSettings(context),
               visible: _advancedSettings,
             ),
-            saveSettingsBuilder(),
-            Visibility(
-              child: advancedSettings(context),
-              visible: !_advancedSettings,
-            ),
+            ButtonTheme(minWidth: 165, child: saveSettingsBuilder()),
+            advancedSettings(context),
           ]),
         ),
       ),
@@ -527,25 +545,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Container advancedSettings(BuildContext context) {
     return Container(
-      child: RaisedButton(
-        onPressed: () {
-          setState(() {
-            _advancedSettings = !_advancedSettings;
-          });
-        },
-        color: Colors.blue[50],
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        child: _advancedSettings
-            ? Text(
-                AppLocalizations.of(context).translate('close_string'),
-                style: TextStyle(fontWeight: FontWeight.bold),
-              )
-            : Text(
-                AppLocalizations.of(context)
-                    .translate('advanced_settings_string'),
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+      child: ButtonTheme(
+        minWidth: 165,
+        child: RaisedButton(
+          onPressed: () {
+            setState(() {
+              _advancedSettings = !_advancedSettings;
+            });
+          },
+          color: Colors.blue[50],
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          child: _advancedSettings
+              ? Text(
+                  AppLocalizations.of(context).translate('close_string'),
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                )
+              : Text(
+                  AppLocalizations.of(context)
+                      .translate('advanced_settings_string'),
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+        ),
       ),
     );
   }
@@ -553,21 +575,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
   showAlertDialogOnSave(BuildContext context) {
     // set up the buttons
     Widget saveButton = FlatButton(
-      child: Text("Save"),
+      child: Text(AppLocalizations.of(context).translate('save_1_string')),
       onPressed: () {
         Navigator.of(context).pop();
         saveSettingsValues(context);
       },
     );
     Widget cancelButton = FlatButton(
-      child: Text("Cancel"),
+      child: Text(AppLocalizations.of(context).translate('cancel_string')),
       onPressed: () {
         Navigator.of(context).pop();
       },
     ); // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: Text("Saving"),
-      content: Text("Are you sure you want to save this settings?"),
+      title: Text(AppLocalizations.of(context).translate('save_string')),
+      content: Text(
+          AppLocalizations.of(context).translate('save_dialog_desc_string')),
       actions: [
         saveButton,
         cancelButton,
@@ -584,7 +607,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Builder saveSettingsBuilder() {
     return Builder(builder: (BuildContext context) {
       return RaisedButton(
-          color: Colors.greenAccent[100],
+          color: Colors.blue[50],
           padding: EdgeInsets.symmetric(horizontal: 20),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
@@ -598,14 +621,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Container defaultSettings(BuildContext context) {
     return Container(
-      child: RaisedButton(
-        onPressed: () => resetSettingsValues(),
-        color: Colors.blue[50],
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        child: Text(
-          AppLocalizations.of(context).translate('default_settings_string'),
-          style: TextStyle(fontWeight: FontWeight.bold),
+      child: ButtonTheme(
+        minWidth: 165,
+        child: RaisedButton(
+          onPressed: () => resetSettingsValues(),
+          color: Colors.blue[50],
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          child: Text(
+            AppLocalizations.of(context).translate('default_settings_string'),
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );
@@ -746,7 +773,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           width: 40,
           height: 50,
           child: IconButton(
-            icon: Icon(Icons.file_upload),
+            icon: Icon(
+              Icons.file_upload,
+              color: Colors.blue,
+            ),
             onPressed: () => showAlertDialog1(context),
           ),
         ),
@@ -779,7 +809,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           width: 40,
           height: 50,
           child: IconButton(
-            icon: Icon(Icons.file_upload),
+            icon: Icon(Icons.file_upload, color: Colors.blue),
             onPressed: () => showAlertDialog2(context),
           ),
         ),
@@ -802,7 +832,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Icons.delete,
               color: (_currentAudioName3 == audioString &&
                       _currentAudioName2 != audioString)
-                  ? Colors.red
+                  ? Colors.blue
                   : Colors.grey,
             ),
             onPressed: (_currentAudioName3 == audioString &&
@@ -824,7 +854,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           width: 40,
           height: 50,
           child: IconButton(
-            icon: Icon(Icons.file_upload),
+            icon: Icon(Icons.file_upload, color: Colors.blue),
             onPressed: () => showAlertDialog3(context),
           ),
         ),
@@ -845,7 +875,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             icon: Icon(
               Icons.delete,
               color: (_currentAudioName3 != audioString)
-                  ? Colors.red
+                  ? Colors.blue
                   : Colors.grey,
             ),
             onPressed: (_currentAudioName3 != audioString)

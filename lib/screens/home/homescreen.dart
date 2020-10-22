@@ -56,7 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String _dBValueRealTime; //realtime dB value when recording
 
-  List<double> dBValueList; //array of realtime values for chosen time frame
+  List<double> dBValueList =
+      []; //array of realtime values for chosen time frame
   int arrLength; //length of array based on time frame and persec value
 
   FlutterLocalNotificationsPlugin fltrNotification;
@@ -71,7 +72,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    dBValueList = [];
     audioPlayer = AudioPlayer();
     _noiseMeter = new NoiseMeter();
     preferencesOnInit();
@@ -242,9 +242,9 @@ class _HomeScreenState extends State<HomeScreen> {
         _noiseSubscription.cancel(); //Cancels MIC
         _noiseSubscription = null;
       }
-      timer.cancel(); //Stops timer that's adding dB values to array
+      timer?.cancel(); //Stops timer that's adding dB values to array
       stopAudio(); //Stops audio alert if playing
-      dBValueList.clear(); //Clears/Resets array of realtime dB values
+      dBValueList?.clear(); //Clears/Resets array of realtime dB values
       _hideNotification(); //Clears mic on notification
       this.setState(() {
         this._isRecording = false;
@@ -271,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //Stops audio file
   void stopAudio() async {
-    await audioPlayer.stop();
+    await audioPlayer?.stop();
   }
 
   @override
@@ -287,7 +287,7 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             RaisedButton(
-              padding: EdgeInsets.all(65),
+              padding: EdgeInsets.all(45),
               color: _isRecording ? Colors.red : Colors.green,
               shape: CircleBorder(),
               onPressed: _isRecording ? this.stop : () => this.start(context),
@@ -304,6 +304,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
             ),
             Divider(
+              color: Colors.transparent,
+            ),
+            Text(
+              "Start/Stop",
+              style: TextStyle(fontSize: 18),
+            ),
+            Divider(
+              height: 60,
               color: Colors.transparent,
             ),
             AbsorbPointer(absorbing: _isRecording, child: soundVolume(context))
