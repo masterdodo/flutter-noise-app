@@ -27,7 +27,9 @@ class _HomeScreenState extends State<HomeScreen> {
   final audioString = "Choose audio file...";
   Duration duration;
 
-  final controller = TextEditingController(); //text controller
+  double _audioVolumeMinValue = 1;
+  double _audioVolumeMaxValue = 100;
+  final audioVolumeController = TextEditingController(); //text controller
   Timer timer; //timer used for persec dB checks
 
   final snackBarNoAudio = SnackBar(
@@ -80,6 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
     audioManager = AudioManager.STREAM_MUSIC;
     initAudioStreamType();
     updateVolumes();
+    audioVolumeController.addListener(_setAudioVolumeValue);
 
     //Notification init
     var androidInitilize = new AndroidInitializationSettings('app_icon');
@@ -94,7 +97,19 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     super.dispose();
-    controller.dispose();
+    audioVolumeController.dispose();
+  }
+
+  _setAudioVolumeValue() {
+    if (double.parse(audioVolumeController.text).roundToDouble() >=
+            _audioVolumeMinValue &&
+        double.parse(audioVolumeController.text).roundToDouble() <=
+            _audioVolumeMaxValue) {
+      setState(() {
+        _activeAudioVolumeValue =
+            double.parse(audioVolumeController.text).round();
+      });
+    }
   }
 
   Future preferencesOnInit() async {
@@ -125,6 +140,8 @@ class _HomeScreenState extends State<HomeScreen> {
     prefs.setString("audioname1Value", _activeAudioFile1);
     prefs.setString("audioname2Value", _activeAudioFile2);
     prefs.setString("audioname3Value", _activeAudioFile3);
+
+    audioVolumeController.text = _activeAudioVolumeValue.round().toString();
   }
 
   Future notificationSelected(String payload) async {
@@ -329,7 +346,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Text(AppLocalizations.of(context).translate('sound_volume_string'),
               style: TextStyle(fontWeight: FontWeight.bold)),
-          audioVolumeSliderControl(1, 100),
+          audioVolumeSliderControl(_audioVolumeMinValue, _audioVolumeMaxValue),
         ],
       ),
     );
@@ -346,19 +363,19 @@ class _HomeScreenState extends State<HomeScreen> {
               min: minVal,
               max: maxVal,
               divisions: (maxVal - minVal).round(),
-              value: _activeAudioVolumeValue?.toDouble() ?? 70,
-              label: _activeAudioVolumeValue?.toString() ?? "70",
+              value: _activeAudioVolumeValue.toDouble() ?? 70,
+              label: _activeAudioVolumeValue.toString() ?? "70",
               onChanged: (double val) {
                 setState(() {
                   _activeAudioVolumeValue = val.round();
+                  audioVolumeController.text = val.round().toString();
                 });
               }),
         ),
         Container(
           width: 30,
           child: TextField(
-            controller:
-                TextEditingController(text: _activeAudioVolumeValue.toString()),
+            controller: audioVolumeController,
             decoration:
                 InputDecoration(border: InputBorder.none, hintText: '0'),
             onChanged: (String text) {

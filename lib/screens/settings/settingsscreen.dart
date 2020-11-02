@@ -11,24 +11,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  /*final snackBarSuccessSettings = SnackBar(
-    content: Text(
-      "Settings saved successfully!",
-      style: TextStyle(color: Colors.black),
-    ),
-    backgroundColor: Colors.greenAccent[400],
-    duration: Duration(seconds: 2),
-  );
-
-  final snackBarFailSettings = SnackBar(
-    content: Text(
-      "Settings not saved! You have to choose a sound.",
-      style: TextStyle(color: Colors.black),
-    ),
-    backgroundColor: Colors.redAccent[400],
-    duration: Duration(seconds: 2),
-  );*/
-
   final audioString = "Choose audio file...";
 
   Timer timer; //timer used for persec dB checks
@@ -41,15 +23,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _currentAudioVolumeValue,
       _currentTimeoutValue;
 
+  double _dbMinValue = 35;
+  double _dbMaxValue = 150;
+  double _perSecMinValue = 1;
+  double _perSecMaxValue = 60;
+  double _timeSampleMinValue = 1;
+  double _timeSampleMaxValue = 60;
+  double _timeoutMinValue = 1;
+  double _timeoutMaxValue = 60;
+  double _audioVolumeMinValue = 1;
+  double _audioVolumeMaxValue = 100;
+
   bool _advancedSettings = false;
 
   String _persecUnit = "sec";
   String _timesampleUnit = "sec";
   String _timeoutUnit = "sec";
 
-  String _currentAudioName1; //current audio name
-  String _currentAudioName2; //current audio name
-  String _currentAudioName3; //current audio name
+  final dbTresholdController = TextEditingController();
+  final perSecController = TextEditingController();
+  final timeSampleController = TextEditingController();
+  final timeoutController = TextEditingController();
+  final audioVolumeController = TextEditingController();
+
+  String _currentAudioName1; //current audio name 1
+  String _currentAudioName2; //current audio name 2
+  String _currentAudioName3; //current audio name 3
+
+  @override
+  void initState() {
+    super.initState();
+    getSharedPrefs();
+    dbTresholdController.addListener(_setDbTresholdValue);
+    perSecController.addListener(_setPerSecValue);
+    timeSampleController.addListener(_setTimeSampleValue);
+    timeoutController.addListener(_setTimeoutValue);
+    audioVolumeController.addListener(_setAudioVolumeValue);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    dbTresholdController.dispose();
+    perSecController.dispose();
+    timeSampleController.dispose();
+    timeoutController.dispose();
+    audioVolumeController.dispose();
+  }
 
   Future<Null> getSharedPrefs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -59,6 +79,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _currentTimeSampleValue = prefs.getInt("timesampleValue") ?? 1;
       _currentTimeoutValue = prefs.getInt("timeoutValue") ?? 1;
       _currentAudioVolumeValue = prefs.getInt("audiovolumeValue") ?? 100;
+      dbTresholdController.text = _currentDbValue.round().toString();
+      perSecController.text = _currentPerSecValue.round().toString();
+      timeSampleController.text = _currentTimeSampleValue.round().toString();
+      timeoutController.text = _currentTimeoutValue.round().toString();
+      audioVolumeController.text = _currentAudioVolumeValue.round().toString();
       _currentAudioName1 = prefs.getString("audioname1Value") ?? audioString;
       _currentAudioName2 = prefs.getString("audioname2Value") ?? audioString;
       _currentAudioName3 = prefs.getString("audioname3Value") ?? audioString;
@@ -68,15 +93,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    getSharedPrefs();
+  _setDbTresholdValue() {
+    if (double.parse(dbTresholdController.text).roundToDouble() >=
+            _dbMinValue &&
+        double.parse(dbTresholdController.text).roundToDouble() <=
+            _dbMaxValue) {
+      setState(() {
+        _currentDbValue = double.parse(dbTresholdController.text).round();
+      });
+    }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  _setPerSecValue() {
+    if (double.parse(perSecController.text).roundToDouble() >=
+            _perSecMinValue &&
+        double.parse(perSecController.text).roundToDouble() <=
+            _perSecMaxValue) {
+      setState(() {
+        _currentPerSecValue = double.parse(perSecController.text).round();
+      });
+    }
+  }
+
+  _setTimeSampleValue() {
+    if (double.parse(timeSampleController.text).roundToDouble() >=
+            _timeSampleMinValue &&
+        double.parse(timeSampleController.text).roundToDouble() <=
+            _timeSampleMaxValue) {
+      setState(() {
+        _currentTimeSampleValue =
+            double.parse(timeSampleController.text).round();
+      });
+    }
+  }
+
+  _setTimeoutValue() {
+    if (double.parse(timeoutController.text).roundToDouble() >=
+            _timeoutMinValue &&
+        double.parse(timeoutController.text).roundToDouble() <=
+            _timeoutMaxValue) {
+      setState(() {
+        _currentTimeoutValue = double.parse(timeoutController.text).round();
+      });
+    }
+  }
+
+  _setAudioVolumeValue() {
+    if (double.parse(audioVolumeController.text).roundToDouble() >=
+            _audioVolumeMinValue &&
+        double.parse(audioVolumeController.text).roundToDouble() <=
+            _audioVolumeMaxValue) {
+      setState(() {
+        _currentAudioVolumeValue =
+            double.parse(audioVolumeController.text).round();
+      });
+    }
   }
 
   showAlertDialog1(BuildContext context) {
@@ -491,18 +562,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _currentAudioName3 = "audio/Censor-beep-3.mp3";
       _currentAudioVolumeValue = 70;
     });
-    /*SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt("dbValue", _currentDbValue);
-    prefs.setInt("persecValue", _currentPerSecValue);
-    prefs.setString("persecUnit", _persecUnit);
-    prefs.setInt("timesampleValue", _currentTimeSampleValue);
-    prefs.setString("timesampleUnit", _timesampleUnit);
-    prefs.setInt("timeoutValue", _currentTimeoutValue);
-    prefs.setString("timeoutUnit", _timeoutUnit);
-    prefs.setInt("audiovolumeValue", _currentAudioVolumeValue);
-    prefs.setString("audioname1Value", _currentAudioName1);
-    prefs.setString("audioname2Value", _currentAudioName2);
-    prefs.setString("audioname3Value", _currentAudioName3);*/
   }
 
   @override
@@ -680,7 +739,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           Text(AppLocalizations.of(context).translate('sound_volume_string'),
               style: TextStyle(fontWeight: FontWeight.bold)),
-          audioVolumeSliderControl(1, 100),
+          audioVolumeSliderControl(_audioVolumeMinValue, _audioVolumeMaxValue),
         ],
       ),
     );
@@ -695,7 +754,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           Text(AppLocalizations.of(context).translate('timeout_string'),
               style: TextStyle(fontWeight: FontWeight.bold)),
-          timeoutSliderControl(1, 60),
+          timeoutSliderControl(_timeoutMinValue, _timeoutMaxValue),
         ],
       ),
     );
@@ -710,7 +769,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           Text(AppLocalizations.of(context).translate('time_frame_string'),
               style: TextStyle(fontWeight: FontWeight.bold)),
-          timeSampleSliderControl(1, 60),
+          timeSampleSliderControl(_timeSampleMinValue, _timeSampleMaxValue),
         ],
       ),
     );
@@ -725,7 +784,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           Text(AppLocalizations.of(context).translate('per_sec_string'),
               style: TextStyle(fontWeight: FontWeight.bold)),
-          perSecSliderControl(1, 60),
+          perSecSliderControl(_perSecMinValue, _perSecMaxValue),
         ],
       ),
     );
@@ -740,7 +799,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           Text(AppLocalizations.of(context).translate('db_treshold_string'),
               style: TextStyle(fontWeight: FontWeight.bold)),
-          dBTresholdSliderControl(30, 150),
+          dBTresholdSliderControl(_dbMinValue, _dbMaxValue),
         ],
       ),
     );
@@ -901,13 +960,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onChanged: (double val) {
                 setState(() {
                   _currentDbValue = val.round();
+                  dbTresholdController.text = val.round().toString();
                 });
               }),
         ),
         Container(
           width: 30,
           child: TextField(
-            controller: TextEditingController(text: _currentDbValue.toString()),
+            controller: dbTresholdController,
             decoration:
                 InputDecoration(border: InputBorder.none, hintText: '0'),
             onChanged: (String text) {
@@ -945,14 +1005,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onChanged: (double val) {
                 setState(() {
                   _currentPerSecValue = val.round();
+                  perSecController.text = val.round().toString();
                 });
               }),
         ),
         Container(
           width: 30,
           child: TextField(
-            controller:
-                TextEditingController(text: _currentPerSecValue.toString()),
+            controller: perSecController,
             decoration:
                 InputDecoration(border: InputBorder.none, hintText: '0'),
             onChanged: (String text) {
@@ -1008,14 +1068,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onChanged: (double val) {
                 setState(() {
                   _currentTimeSampleValue = val.round();
+                  timeSampleController.text = val.round().toString();
                 });
               }),
         ),
         Container(
           width: 30,
           child: TextField(
-            controller:
-                TextEditingController(text: _currentTimeSampleValue.toString()),
+            controller: timeSampleController,
             decoration:
                 InputDecoration(border: InputBorder.none, hintText: '0'),
             onChanged: (String text) {
@@ -1071,14 +1131,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onChanged: (double val) {
                 setState(() {
                   _currentTimeoutValue = val.round();
+                  timeoutController.text = val.round().toString();
                 });
               }),
         ),
         Container(
           width: 30,
           child: TextField(
-            controller:
-                TextEditingController(text: _currentTimeoutValue.toString()),
+            controller: timeoutController,
             decoration:
                 InputDecoration(border: InputBorder.none, hintText: '0'),
             onChanged: (String text) {
@@ -1133,14 +1193,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onChanged: (double val) {
                 setState(() {
                   _currentAudioVolumeValue = val.round();
+                  audioVolumeController.text = val.round().toString();
                 });
               }),
         ),
         Container(
           width: 30,
           child: TextField(
-            controller: TextEditingController(
-                text: _currentAudioVolumeValue.toString()),
+            controller: audioVolumeController,
             decoration:
                 InputDecoration(border: InputBorder.none, hintText: '0'),
             onChanged: (String text) {
