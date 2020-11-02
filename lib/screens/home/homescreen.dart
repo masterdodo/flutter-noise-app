@@ -363,8 +363,8 @@ class _HomeScreenState extends State<HomeScreen> {
               min: minVal,
               max: maxVal,
               divisions: (maxVal - minVal).round(),
-              value: _activeAudioVolumeValue.toDouble() ?? 70,
-              label: _activeAudioVolumeValue.toString() ?? "70",
+              value: _activeAudioVolumeValue?.toDouble() ?? 70,
+              label: _activeAudioVolumeValue?.toString() ?? "70",
               onChanged: (double val) {
                 setState(() {
                   _activeAudioVolumeValue = val.round();
