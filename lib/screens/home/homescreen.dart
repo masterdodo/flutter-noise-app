@@ -54,6 +54,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int _timeLastAudioPlayed = 0;
   int _activeTimeoutValue;
 
+  int soundCounter;
+
   int maxVol, currentVol;
 
   String _dBValueRealTime; //realtime dB value when recording
@@ -83,6 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
     initAudioStreamType();
     updateVolumes();
     audioVolumeController.addListener(_setAudioVolumeValue);
+    soundCounter = 0;
 
     //Notification init
     var androidInitilize = new AndroidInitializationSettings('app_icon');
@@ -215,6 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _noiseSubscription = _noiseMeter.noiseStream.listen(onData);
         setState(() {
           //Sets active values from sliders and calculates the length of an array
+          soundCounter = 0;
           _activeDbValue = prefs.getInt("dbValue") ?? 30;
           _activePerSecValue = prefs.getInt("persecValue") ?? 1;
           _activePerSecUnit = prefs.getString("persecUnit") ?? 'sec';
@@ -274,6 +278,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //Play audio file
   void playAudio() async {
+    setState(() {
+      soundCounter++;
+    });
     if (_defaultSounds.containsKey(_activeAudioFile1)) {
       await assetPlayer.play(_activeAudioFile1);
       setState(() =>
@@ -299,41 +306,54 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context).translate('main_string')),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            RaisedButton(
-              padding: EdgeInsets.all(45),
-              color: _isRecording ? Colors.red : Colors.green,
-              shape: CircleBorder(),
-              onPressed: _isRecording ? this.stop : () => this.start(context),
-              child: _isRecording
-                  ? Icon(
-                      Icons.stop,
-                      color: Colors.white,
-                      size: 50,
-                    )
-                  : Icon(
-                      Icons.mic,
-                      color: Colors.white,
-                      size: 50,
-                    ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 30, bottom: 30),
+            child: Text(
+              soundCounter.toString().padLeft(3, '0'),
+              style: TextStyle(fontSize: 40),
             ),
-            Divider(
-              color: Colors.transparent,
+          ),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                RaisedButton(
+                  padding: EdgeInsets.all(45),
+                  color: _isRecording ? Colors.red : Colors.green,
+                  shape: CircleBorder(),
+                  onPressed:
+                      _isRecording ? this.stop : () => this.start(context),
+                  child: _isRecording
+                      ? Icon(
+                          Icons.stop,
+                          color: Colors.white,
+                          size: 50,
+                        )
+                      : Icon(
+                          Icons.mic,
+                          color: Colors.white,
+                          size: 50,
+                        ),
+                ),
+                Divider(
+                  color: Colors.transparent,
+                ),
+                Text(
+                  "Start/Stop",
+                  style: TextStyle(fontSize: 18),
+                ),
+                Divider(
+                  height: 60,
+                  color: Colors.transparent,
+                ),
+                AbsorbPointer(
+                    absorbing: _isRecording, child: soundVolume(context))
+              ],
             ),
-            Text(
-              "Start/Stop",
-              style: TextStyle(fontSize: 18),
-            ),
-            Divider(
-              height: 60,
-              color: Colors.transparent,
-            ),
-            AbsorbPointer(absorbing: _isRecording, child: soundVolume(context))
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

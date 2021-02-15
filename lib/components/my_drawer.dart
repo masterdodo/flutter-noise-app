@@ -136,7 +136,8 @@ class MyDrawer extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text(AppLocalizations.of(context).translate('exit_string')),
-            onTap: () => SystemNavigator.pop(),
+            onTap: () =>
+                SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
           ),
         ],
       ),

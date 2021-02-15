@@ -12,7 +12,7 @@ class NoiseApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Noise App',
+      title: 'Snorty',
       theme: appTheme(),
       supportedLocales: [Locale('en', 'US'), Locale('sl', 'SI')],
       localizationsDelegates: [
