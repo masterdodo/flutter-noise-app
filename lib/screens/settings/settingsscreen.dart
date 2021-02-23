@@ -814,8 +814,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: sliderBoxDecoration(),
       child: Column(
         children: [
-          Text(AppLocalizations.of(context).translate('sound_volume_string'),
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                  AppLocalizations.of(context).translate('sound_volume_string'),
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Container(
+                padding: EdgeInsets.only(left: 7.0),
+                width: 30,
+                child: TextField(
+                  controller: audioVolumeController,
+                  decoration:
+                      InputDecoration(border: InputBorder.none, hintText: '0'),
+                  onChanged: (String text) {
+                    if (double.parse(text) >= _audioVolumeMinValue &&
+                        double.parse(text) <= _audioVolumeMaxValue) {
+                      setState(() {
+                        _currentAudioVolumeValue = int.parse(text);
+                      });
+                    }
+                  },
+                ),
+              ),
+              Container(
+                  child: Text(
+                "%",
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              )),
+            ],
+          ),
           audioVolumeSliderControl(_audioVolumeMinValue, _audioVolumeMaxValue),
         ],
       ),
@@ -829,8 +859,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: sliderBoxDecoration(),
       child: Column(
         children: [
-          Text(AppLocalizations.of(context).translate('timeout_string'),
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(AppLocalizations.of(context).translate('timeout_string'),
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Container(
+                padding: EdgeInsets.only(left: 7.0),
+                width: 30,
+                child: TextField(
+                  controller: timeoutController,
+                  decoration:
+                      InputDecoration(border: InputBorder.none, hintText: '0'),
+                  onChanged: (String text) {
+                    if (double.parse(text) >= _timeoutMinValue &&
+                        double.parse(text) <= _timeoutMaxValue) {
+                      setState(() {
+                        _currentTimeoutValue = int.parse(text);
+                      });
+                    }
+                  },
+                ),
+              ),
+              Container(
+                  width: 46,
+                  child: DropdownButton<String>(
+                    value: _timeoutUnit,
+                    icon: Icon(Icons.arrow_downward),
+                    iconSize: 24,
+                    elevation: 16,
+                    style: TextStyle(color: Colors.black),
+                    underline: Container(
+                      height: 2,
+                      color: Colors.blueAccent,
+                    ),
+                    onChanged: (String newValue) {
+                      setState(() {
+                        _timeoutUnit = newValue;
+                      });
+                    },
+                    items: <String>['sec', 'min', 'hr']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  )),
+            ],
+          ),
           timeoutSliderControl(_timeoutMinValue, _timeoutMaxValue),
         ],
       ),
@@ -844,8 +921,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: sliderBoxDecoration(),
       child: Column(
         children: [
-          Text(AppLocalizations.of(context).translate('time_frame_string'),
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(AppLocalizations.of(context).translate('time_frame_string'),
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Container(
+                padding: EdgeInsets.only(left: 7.0),
+                width: 30,
+                child: TextField(
+                  controller: timeSampleController,
+                  decoration:
+                      InputDecoration(border: InputBorder.none, hintText: '0'),
+                  onChanged: (String text) {
+                    if (double.parse(text) >= _timeSampleMinValue &&
+                        double.parse(text) <= _timeSampleMaxValue) {
+                      setState(() {
+                        _currentTimeSampleValue = int.parse(text);
+                      });
+                    }
+                  },
+                ),
+              ),
+              Container(
+                  width: 46,
+                  child: DropdownButton<String>(
+                    value: _timesampleUnit,
+                    icon: Icon(Icons.arrow_drop_down),
+                    iconSize: 24,
+                    elevation: 16,
+                    style: TextStyle(color: Colors.black),
+                    underline: Container(
+                      height: 2,
+                      color: Colors.blueAccent,
+                    ),
+                    onChanged: (String newValue) {
+                      setState(() {
+                        _timesampleUnit = newValue;
+                      });
+                    },
+                    items: <String>['sec', 'min', 'hr']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  )),
+            ],
+          ),
           timeSampleSliderControl(_timeSampleMinValue, _timeSampleMaxValue),
         ],
       ),
@@ -859,8 +983,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: sliderBoxDecoration(),
       child: Column(
         children: [
-          Text(AppLocalizations.of(context).translate('per_sec_string'),
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(AppLocalizations.of(context).translate('per_sec_string'),
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Container(
+                padding: EdgeInsets.only(left: 7.0),
+                width: 30,
+                child: TextField(
+                  controller: perSecController,
+                  decoration:
+                      InputDecoration(border: InputBorder.none, hintText: '0'),
+                  onChanged: (String text) {
+                    if (double.parse(text) >= _perSecMinValue &&
+                        double.parse(text) <= _perSecMaxValue) {
+                      setState(() {
+                        _currentPerSecValue = int.parse(text);
+                      });
+                    }
+                  },
+                ),
+              ),
+              Container(
+                  width: 46,
+                  child: DropdownButton<String>(
+                    value: _persecUnit,
+                    icon: Icon(Icons.arrow_drop_down),
+                    iconSize: 24,
+                    elevation: 16,
+                    style: TextStyle(color: Colors.black),
+                    underline: Container(
+                      height: 2,
+                      color: Colors.blueAccent,
+                    ),
+                    onChanged: (String newValue) {
+                      setState(() {
+                        _persecUnit = newValue;
+                      });
+                    },
+                    items: <String>['sec', 'min', 'hr']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  )),
+            ],
+          ),
           perSecSliderControl(_perSecMinValue, _perSecMaxValue),
         ],
       ),
@@ -1058,10 +1229,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         GestureDetector(
           onTap: () {
-            setState(() {
-              _currentDbValue--;
-              dbTresholdController.text = _currentDbValue.toString();
-            });
+            if (_currentDbValue > minVal) {
+              setState(() {
+                _currentDbValue--;
+                dbTresholdController.text = _currentDbValue.toString();
+              });
+            }
           },
           child: Icon(Icons.remove),
         ),
@@ -1081,10 +1254,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         GestureDetector(
           onTap: () {
-            setState(() {
-              _currentDbValue++;
-              dbTresholdController.text = _currentDbValue.toString();
-            });
+            if (_currentDbValue < maxVal) {
+              setState(() {
+                _currentDbValue++;
+                dbTresholdController.text = _currentDbValue.toString();
+              });
+            }
           },
           child: Icon(Icons.add),
         ),
@@ -1096,6 +1271,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Row perSecSliderControl(double minVal, double maxVal) {
     return Row(
       children: [
+        GestureDetector(
+          onTap: () {
+            if (_currentPerSecValue > minVal) {
+              setState(() {
+                _currentPerSecValue--;
+                perSecController.text = _currentPerSecValue.toString();
+              });
+            }
+          },
+          child: Icon(Icons.remove),
+        ),
         Flexible(
           child: Slider(
               min: minVal,
@@ -1110,47 +1296,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 });
               }),
         ),
-        Container(
-          width: 30,
-          child: TextField(
-            controller: perSecController,
-            decoration:
-                InputDecoration(border: InputBorder.none, hintText: '0'),
-            onChanged: (String text) {
-              if (double.parse(text) >= minVal &&
-                  double.parse(text) <= maxVal) {
-                setState(() {
-                  _currentPerSecValue = int.parse(text);
-                });
-              }
-            },
-          ),
+        GestureDetector(
+          onTap: () {
+            if (_currentPerSecValue < maxVal) {
+              setState(() {
+                _currentPerSecValue++;
+                perSecController.text = _currentPerSecValue.toString();
+              });
+            }
+          },
+          child: Icon(Icons.add),
         ),
-        Container(
-            width: 46,
-            child: DropdownButton<String>(
-              value: _persecUnit,
-              icon: Icon(Icons.arrow_downward),
-              iconSize: 24,
-              elevation: 16,
-              style: TextStyle(color: Colors.black),
-              underline: Container(
-                height: 2,
-                color: Colors.blueAccent,
-              ),
-              onChanged: (String newValue) {
-                setState(() {
-                  _persecUnit = newValue;
-                });
-              },
-              items: <String>['sec', 'min', 'hr']
-                  .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            )),
       ],
     );
   }
@@ -1159,6 +1315,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Row timeSampleSliderControl(double minVal, double maxVal) {
     return Row(
       children: [
+        GestureDetector(
+          onTap: () {
+            if (_currentTimeSampleValue > minVal) {
+              setState(() {
+                _currentTimeSampleValue--;
+                timeSampleController.text = _currentTimeSampleValue.toString();
+              });
+            }
+          },
+          child: Icon(Icons.remove),
+        ),
         Flexible(
           child: Slider(
               min: minVal,
@@ -1173,47 +1340,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 });
               }),
         ),
-        Container(
-          width: 30,
-          child: TextField(
-            controller: timeSampleController,
-            decoration:
-                InputDecoration(border: InputBorder.none, hintText: '0'),
-            onChanged: (String text) {
-              if (double.parse(text) >= minVal &&
-                  double.parse(text) <= maxVal) {
-                setState(() {
-                  _currentTimeSampleValue = int.parse(text);
-                });
-              }
-            },
-          ),
+        GestureDetector(
+          onTap: () {
+            if (_currentTimeSampleValue < maxVal) {
+              setState(() {
+                _currentTimeSampleValue++;
+                timeSampleController.text = _currentTimeSampleValue.toString();
+              });
+            }
+          },
+          child: Icon(Icons.add),
         ),
-        Container(
-            width: 46,
-            child: DropdownButton<String>(
-              value: _timesampleUnit,
-              icon: Icon(Icons.arrow_downward),
-              iconSize: 24,
-              elevation: 16,
-              style: TextStyle(color: Colors.black),
-              underline: Container(
-                height: 2,
-                color: Colors.blueAccent,
-              ),
-              onChanged: (String newValue) {
-                setState(() {
-                  _timesampleUnit = newValue;
-                });
-              },
-              items: <String>['sec', 'min', 'hr']
-                  .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            )),
       ],
     );
   }
@@ -1222,6 +1359,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Row timeoutSliderControl(double minVal, double maxVal) {
     return Row(
       children: [
+        GestureDetector(
+          onTap: () {
+            if (_currentTimeoutValue > minVal) {
+              setState(() {
+                _currentTimeoutValue--;
+                timeoutController.text = _currentTimeoutValue.toString();
+              });
+            }
+          },
+          child: Icon(Icons.remove),
+        ),
         Flexible(
           child: Slider(
               min: minVal,
@@ -1236,47 +1384,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 });
               }),
         ),
-        Container(
-          width: 30,
-          child: TextField(
-            controller: timeoutController,
-            decoration:
-                InputDecoration(border: InputBorder.none, hintText: '0'),
-            onChanged: (String text) {
-              if (double.parse(text) >= minVal &&
-                  double.parse(text) <= maxVal) {
-                setState(() {
-                  _currentTimeoutValue = int.parse(text);
-                });
-              }
-            },
-          ),
+        GestureDetector(
+          onTap: () {
+            if (_currentTimeoutValue < maxVal) {
+              setState(() {
+                _currentTimeoutValue++;
+                timeoutController.text = _currentTimeoutValue.toString();
+              });
+            }
+          },
+          child: Icon(Icons.add),
         ),
-        Container(
-            width: 46,
-            child: DropdownButton<String>(
-              value: _timeoutUnit,
-              icon: Icon(Icons.arrow_downward),
-              iconSize: 24,
-              elevation: 16,
-              style: TextStyle(color: Colors.black),
-              underline: Container(
-                height: 2,
-                color: Colors.blueAccent,
-              ),
-              onChanged: (String newValue) {
-                setState(() {
-                  _timeoutUnit = newValue;
-                });
-              },
-              items: <String>['sec', 'min', 'hr']
-                  .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            )),
       ],
     );
   }
@@ -1284,6 +1402,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Row audioVolumeSliderControl(double minVal, double maxVal) {
     return Row(
       children: [
+        GestureDetector(
+          onTap: () {
+            if (_currentAudioVolumeValue > minVal) {
+              setState(() {
+                _currentAudioVolumeValue--;
+                audioVolumeController.text =
+                    _currentAudioVolumeValue.toString();
+              });
+            }
+          },
+          child: Icon(Icons.remove),
+        ),
         Flexible(
           child: Slider(
               min: minVal,
@@ -1298,29 +1428,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 });
               }),
         ),
-        Container(
-          width: 30,
-          child: TextField(
-            controller: audioVolumeController,
-            decoration:
-                InputDecoration(border: InputBorder.none, hintText: '0'),
-            onChanged: (String text) {
-              if (double.parse(text) >= minVal &&
-                  double.parse(text) <= maxVal) {
-                setState(() {
-                  _currentAudioVolumeValue = int.parse(text);
-                });
-              }
-            },
-          ),
+        GestureDetector(
+          onTap: () {
+            if (_currentAudioVolumeValue < maxVal) {
+              setState(() {
+                _currentAudioVolumeValue++;
+                audioVolumeController.text =
+                    _currentAudioVolumeValue.toString();
+              });
+            }
+          },
+          child: Icon(Icons.add),
         ),
-        Container(
-            child: Text(
-          "%",
-          style: TextStyle(
-            fontSize: 18,
-          ),
-        )),
       ],
     );
   }

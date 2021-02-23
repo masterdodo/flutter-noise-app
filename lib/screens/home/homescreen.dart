@@ -435,7 +435,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   AppLocalizations.of(context).translate('sound_volume_string'),
                   style: TextStyle(fontWeight: FontWeight.bold)),
               Container(
-                padding: EdgeInsets.only(left: 7.0),
+                padding: EdgeInsets.only(left: 6.0),
                 width: 30,
                 child: TextField(
                   controller: audioVolumeController,
@@ -474,10 +474,12 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         GestureDetector(
           onTap: () {
-            setState(() {
-              _activeAudioVolumeValue--;
-              audioVolumeController.text = _activeAudioVolumeValue.toString();
-            });
+            if (_activeAudioVolumeValue > minVal) {
+              setState(() {
+                _activeAudioVolumeValue--;
+                audioVolumeController.text = _activeAudioVolumeValue.toString();
+              });
+            }
           },
           child: Icon(Icons.remove),
         ),
@@ -500,10 +502,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         GestureDetector(
           onTap: () {
-            setState(() {
-              _activeAudioVolumeValue++;
-              audioVolumeController.text = _activeAudioVolumeValue.toString();
-            });
+            if (_activeAudioVolumeValue < maxVal) {
+              setState(() {
+                _activeAudioVolumeValue++;
+                audioVolumeController.text = _activeAudioVolumeValue.toString();
+              });
+            }
           },
           child: Icon(Icons.add),
         ),
