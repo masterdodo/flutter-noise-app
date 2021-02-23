@@ -4,11 +4,13 @@ import 'package:noise_meter/noise_meter.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:volume/volume.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:share/share.dart';
 import 'dart:async';
+import 'package:flutter/services.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -54,11 +56,13 @@ class _HomeScreenState extends State<HomeScreen> {
   int _timeLastAudioPlayed = 0;
   int _activeTimeoutValue;
 
+  String _bestAudioFile;
+
   int soundCounter;
 
   int maxVol, currentVol;
 
-  String _dBValueRealTime; //realtime dB value when recording
+  String _dBValueRealTime = ""; //realtime dB value when recording
 
   List<double> dBValueList =
       []; //array of realtime values for chosen time frame
@@ -73,11 +77,25 @@ class _HomeScreenState extends State<HomeScreen> {
     "audio/Grocery-Scanning.mp3": 4
   };
 
+  //ADS
+  BannerAd _bannerAd;
+  static const MobileAdTargetingInfo targetInfo = MobileAdTargetingInfo();
+
+  BannerAd createBannerAd() {
+    return BannerAd(
+        adUnitId: BannerAd.testAdUnitId,
+        targetingInfo: targetInfo,
+        size: AdSize.smartBanner,
+        listener: (MobileAdEvent event) {
+          print('Banner Event: $event');
+        });
+  }
+
   @override
   void initState() {
     super.initState();
     audioPlayer = AudioPlayer();
-    _noiseMeter = new NoiseMeter();
+    _noiseMeter = new NoiseMeter(onError);
     preferencesOnInit();
     _isRecording = false;
     arrLength = 0;
@@ -86,6 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
     updateVolumes();
     audioVolumeController.addListener(_setAudioVolumeValue);
     soundCounter = 0;
+    _bestAudioFile = null;
 
     //Notification init
     var androidInitilize = new AndroidInitializationSettings('app_icon');
@@ -95,12 +114,17 @@ class _HomeScreenState extends State<HomeScreen> {
     fltrNotification = new FlutterLocalNotificationsPlugin();
     fltrNotification.initialize(initializationSettings,
         onSelectNotification: notificationSelected);
+    //Ads
+    FirebaseAdMob.instance
+        .initialize(appId: "ca-app-pub-4998785370755707~2117070259");
+    _bannerAd = createBannerAd()..load();
   }
 
   @override
   void dispose() {
     super.dispose();
     audioVolumeController.dispose();
+    _bannerAd.dispose();
   }
 
   _setAudioVolumeValue() {
@@ -131,6 +155,8 @@ class _HomeScreenState extends State<HomeScreen> {
         prefs.getString("audioname2Value") ?? 'audio/Foghorn.mp3';
     _activeAudioFile3 =
         prefs.getString("audioname3Value") ?? 'audio/Censor-beep-3.mp3';
+    _bestAudioFile =
+        prefs.getString("audioname1Value") ?? 'audio/Grocery-Scanning.mp3';
 
     prefs.setInt("dbValue", _activeDbValue);
     prefs.setInt("persecValue", _activePerSecValue);
@@ -205,6 +231,11 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       _dBValueRealTime = noiseReading.meanDecibel.toString();
     });
+  }
+
+  void onError(PlatformException e) {
+    print(e.toString());
+    _isRecording = false;
   }
 
   //Turn MIC on
@@ -300,60 +331,93 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _bgColor,
-      drawer: MyDrawer(),
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context).translate('main_string')),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 30, bottom: 30),
-            child: Text(
-              soundCounter.toString().padLeft(3, '0'),
-              style: TextStyle(fontSize: 40),
+    Timer(Duration(seconds: 3), () {
+      try {
+        if (this.mounted) {
+          _bannerAd?.show();
+        }
+      } catch (e) {
+        print("Yikes");
+      }
+    });
+    return WillPopScope(
+      onWillPop: () async {
+        return showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+                  title: Text(AppLocalizations.of(context)
+                      .translate("exit_app_string")),
+                  actions: [
+                    FlatButton(
+                      child: Text(
+                          AppLocalizations.of(context).translate("no_string")),
+                      onPressed: () => Navigator.pop(context, false),
+                    ),
+                    FlatButton(
+                      child: Text(
+                          AppLocalizations.of(context).translate("yes_string")),
+                      onPressed: () => Navigator.pop(context, true),
+                    )
+                  ],
+                ));
+      },
+      child: Scaffold(
+        drawerEdgeDragWidth: (_noiseSubscription != null) ? 0 : 20.0,
+        backgroundColor: _bgColor,
+        drawer: (_noiseSubscription != null) ? null : MyDrawer(),
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context).translate('main_string')),
+          automaticallyImplyLeading: (_noiseSubscription == null),
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 30, bottom: 30),
+              child: Text(
+                soundCounter.toString().padLeft(3, '0'),
+                style: TextStyle(fontSize: 40),
+              ),
             ),
-          ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                RaisedButton(
-                  padding: EdgeInsets.all(45),
-                  color: _isRecording ? Colors.red : Colors.green,
-                  shape: CircleBorder(),
-                  onPressed:
-                      _isRecording ? this.stop : () => this.start(context),
-                  child: _isRecording
-                      ? Icon(
-                          Icons.stop,
-                          color: Colors.white,
-                          size: 50,
-                        )
-                      : Icon(
-                          Icons.mic,
-                          color: Colors.white,
-                          size: 50,
-                        ),
-                ),
-                Divider(
-                  color: Colors.transparent,
-                ),
-                Text(
-                  "Start/Stop",
-                  style: TextStyle(fontSize: 18),
-                ),
-                Divider(
-                  height: 60,
-                  color: Colors.transparent,
-                ),
-                AbsorbPointer(
-                    absorbing: _isRecording, child: soundVolume(context))
-              ],
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  RaisedButton(
+                    padding: EdgeInsets.all(45),
+                    color: _isRecording ? Colors.red : Colors.green,
+                    shape: CircleBorder(),
+                    onPressed:
+                        _isRecording ? this.stop : () => this.start(context),
+                    child: _isRecording
+                        ? Icon(
+                            Icons.stop,
+                            color: Colors.white,
+                            size: 50,
+                          )
+                        : Icon(
+                            Icons.mic,
+                            color: Colors.white,
+                            size: 50,
+                          ),
+                  ),
+                  Divider(
+                    color: Colors.transparent,
+                  ),
+                  Text(
+                    "Start/Stop",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  Divider(
+                    height: 60,
+                    color: Colors.transparent,
+                  ),
+                  AbsorbPointer(
+                      absorbing: _isRecording, child: soundVolume(context))
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -364,8 +428,41 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: EdgeInsets.all(5),
       child: Column(
         children: [
-          Text(AppLocalizations.of(context).translate('sound_volume_string'),
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                  AppLocalizations.of(context).translate('sound_volume_string'),
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Container(
+                padding: EdgeInsets.only(left: 7.0),
+                width: 30,
+                child: TextField(
+                  controller: audioVolumeController,
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.zero,
+                    border: InputBorder.none,
+                    hintText: '0',
+                  ),
+                  onChanged: (String text) {
+                    if (double.parse(text) >= _audioVolumeMinValue &&
+                        double.parse(text) <= _audioVolumeMaxValue) {
+                      setState(() {
+                        _activeAudioVolumeValue = int.parse(text);
+                      });
+                    }
+                  },
+                ),
+              ),
+              Container(
+                  child: Text(
+                "%",
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              )),
+            ],
+          ),
           audioVolumeSliderControl(_audioVolumeMinValue, _audioVolumeMaxValue),
         ],
       ),
@@ -375,6 +472,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Row audioVolumeSliderControl(double minVal, double maxVal) {
     return Row(
       children: [
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _activeAudioVolumeValue--;
+              audioVolumeController.text = _activeAudioVolumeValue.toString();
+            });
+          },
+          child: Icon(Icons.remove),
+        ),
         Flexible(
           child: Slider(
               activeColor: (_isRecording) ? Colors.grey[300] : Colors.blue,
@@ -392,29 +498,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 });
               }),
         ),
-        Container(
-          width: 30,
-          child: TextField(
-            controller: audioVolumeController,
-            decoration:
-                InputDecoration(border: InputBorder.none, hintText: '0'),
-            onChanged: (String text) {
-              if (double.parse(text) >= minVal &&
-                  double.parse(text) <= maxVal) {
-                setState(() {
-                  _activeAudioVolumeValue = int.parse(text);
-                });
-              }
-            },
-          ),
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _activeAudioVolumeValue++;
+              audioVolumeController.text = _activeAudioVolumeValue.toString();
+            });
+          },
+          child: Icon(Icons.add),
         ),
-        Container(
-            child: Text(
-          "%",
-          style: TextStyle(
-            fontSize: 18,
-          ),
-        )),
       ],
     );
   }
@@ -433,7 +525,10 @@ class _HomeScreenState extends State<HomeScreen> {
     if (dBValueList?.length == arrLength) {
       dBValueList.removeAt(0);
     }
-    dBValueList.add(double.parse(text));
+    if (text != null || text != "") {
+      dBValueList.add(double.parse(text));
+      print(text);
+    }
     if (dBValueList?.length == arrLength) {
       double avg = 0;
       for (double x in dBValueList) {

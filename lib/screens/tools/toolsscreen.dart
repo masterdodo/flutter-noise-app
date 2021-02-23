@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:noise_app/app_localizations.dart';
 import 'package:noise_app/components/my_drawer.dart';
 import 'package:noise_meter/noise_meter.dart';
@@ -26,7 +27,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
   @override
   void initState() {
     super.initState();
-    _noiseMeter = new NoiseMeter();
+    _noiseMeter = new NoiseMeter(onError);
     _isRecording = false;
     _isRunning = false;
     maxDb = "30.00";
@@ -38,6 +39,11 @@ class _ToolsScreenState extends State<ToolsScreen> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void onError(PlatformException e) {
+    print(e.toString());
+    _isRecording = false;
   }
 
   void start() async {
@@ -54,9 +60,11 @@ class _ToolsScreenState extends State<ToolsScreen> {
         _noiseSubscription.cancel();
         _noiseSubscription = null;
       }
-      this.setState(() {
-        this._isRecording = false;
-      });
+      if (this.mounted) {
+        this.setState(() {
+          this._isRecording = false;
+        });
+      }
     } catch (err) {
       print('stopRecorder error: $err');
     }
@@ -82,13 +90,15 @@ class _ToolsScreenState extends State<ToolsScreen> {
     if (sw.isRunning) {
       starttimer();
     }
-    setState(() {
-      stopwatchDisplay = sw.elapsed.inHours.toString().padLeft(2, "0") +
-          ":" +
-          (sw.elapsed.inMinutes % 60).toString().padLeft(2, "0") +
-          ":" +
-          (sw.elapsed.inSeconds % 60).toString().padLeft(2, "0");
-    });
+    if (this.mounted) {
+      setState(() {
+        stopwatchDisplay = sw.elapsed.inHours.toString().padLeft(2, "0") +
+            ":" +
+            (sw.elapsed.inMinutes % 60).toString().padLeft(2, "0") +
+            ":" +
+            (sw.elapsed.inSeconds % 60).toString().padLeft(2, "0");
+      });
+    }
   }
 
   void startSw() {
@@ -115,90 +125,102 @@ class _ToolsScreenState extends State<ToolsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _bgColor,
-      drawer: MyDrawer(),
-      appBar: AppBar(
-        title:
-            Text(AppLocalizations.of(context).translate('menu_tools_string')),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(10.0),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 15, top: 20),
-                child: Text(
-                  AppLocalizations.of(context).translate('noise_meter_string'),
-                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)
-                        .translate('average_noise_string'),
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
-                  ),
-                  RaisedButton(
-                    padding: EdgeInsets.all(15),
-                    onPressed: _isRecording ? this.stop : this.start,
-                    color: _isRecording ? Colors.red : Colors.green,
-                    shape: CircleBorder(),
-                    child: _isRecording
-                        ? Icon(Icons.stop)
-                        : Icon(Icons.play_arrow),
-                  ),
-                  Text(
-                    this.meanDb,
-                    style: TextStyle(
-                      fontSize: 35,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-              Divider(
-                color: Colors.transparent,
-                height: 20,
-              ),
-              Padding(
-                  padding: const EdgeInsets.only(top: 25, bottom: 20),
+    return WillPopScope(
+      onWillPop: () async {
+        stop();
+        stopSw();
+        Navigator.pushReplacementNamed(context, "/");
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: _bgColor,
+        drawer: MyDrawer(
+          stopSound: stop,
+        ),
+        appBar: AppBar(
+          title:
+              Text(AppLocalizations.of(context).translate('menu_tools_string')),
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(10.0),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 15, top: 20),
                   child: Text(
-                    AppLocalizations.of(context).translate('stopwatch_string'),
-                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                  )),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  RaisedButton(
-                    padding: EdgeInsets.all(15),
-                    onPressed: _isRunning ? this.stopSw : this.startSw,
-                    color: _isRunning ? Colors.red : Colors.green,
-                    shape: CircleBorder(),
-                    child:
-                        _isRunning ? Icon(Icons.stop) : Icon(Icons.play_arrow),
+                    AppLocalizations.of(context)
+                        .translate('noise_meter_string'),
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  RaisedButton(
-                    padding: EdgeInsets.all(15),
-                    onPressed: this.resetSw,
-                    color: Colors.blue,
-                    shape: CircleBorder(),
-                    child: Icon(Icons.clear),
-                  ),
-                  Text(
-                    stopwatchDisplay,
-                    style: TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w600,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)
+                          .translate('average_noise_string'),
+                      style: TextStyle(fontWeight: FontWeight.normal),
                     ),
-                  )
-                ],
-              ),
-            ],
+                    RaisedButton(
+                      padding: EdgeInsets.all(15),
+                      onPressed: _isRecording ? this.stop : this.start,
+                      color: _isRecording ? Colors.red : Colors.green,
+                      shape: CircleBorder(),
+                      child: _isRecording
+                          ? Icon(Icons.stop)
+                          : Icon(Icons.play_arrow),
+                    ),
+                    Text(
+                      this.meanDb,
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                Divider(
+                  color: Colors.transparent,
+                  height: 20,
+                ),
+                Padding(
+                    padding: const EdgeInsets.only(top: 25, bottom: 20),
+                    child: Text(
+                      AppLocalizations.of(context)
+                          .translate('stopwatch_string'),
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    )),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    RaisedButton(
+                      padding: EdgeInsets.all(15),
+                      onPressed: _isRunning ? this.stopSw : this.startSw,
+                      color: _isRunning ? Colors.red : Colors.green,
+                      shape: CircleBorder(),
+                      child: _isRunning
+                          ? Icon(Icons.stop)
+                          : Icon(Icons.play_arrow),
+                    ),
+                    RaisedButton(
+                      padding: EdgeInsets.all(15),
+                      onPressed: this.resetSw,
+                      color: Colors.blue,
+                      shape: CircleBorder(),
+                      child: Icon(Icons.clear),
+                    ),
+                    Text(
+                      stopwatchDisplay,
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

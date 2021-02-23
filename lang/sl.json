@@ -26,6 +26,7 @@
     "exit_string": "Izhod",
     "default_settings_string": "Tovarniške nastavitve",
     "advanced_settings_string": "Več nastavitev",
+    "advanced_settings_close_string": "Manj nastavitev",
     "close_string": "Zapri",
     "help_intro_string": "Lahko uporabite prednastavljene vrednosti ali jih prilagodite po svojih željah.",
     "on_off_string": "Vklop/Izklop",
@@ -44,5 +45,8 @@
     "save_1_string": "Shrani",
     "save_dialog_desc_string": "Ste prepričani, da želite shraniti te nastavitve?",
     "share_menu_string": "Deli",
-    "email_menu_string": "Pošlji nam E-pošto"
+    "email_menu_string": "Pošlji nam E-pošto",
+    "yes_string": "Da",
+    "no_string": "Ne",
+    "exit_app_string": "Ali res želite zapreti aplikacijo?"
 }

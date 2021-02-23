@@ -35,6 +35,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   double _audioVolumeMaxValue = 100;
 
   bool _advancedSettings = false;
+  bool _settingsChanged = false;
 
   String _persecUnit = "sec";
   String _timesampleUnit = "sec";
@@ -53,12 +54,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    getSharedPrefs();
+    loadingVarsAsync();
+  }
+
+  void loadingVarsAsync() async {
+    await getSharedPrefs();
     dbTresholdController.addListener(_setDbTresholdValue);
     perSecController.addListener(_setPerSecValue);
     timeSampleController.addListener(_setTimeSampleValue);
     timeoutController.addListener(_setTimeoutValue);
     audioVolumeController.addListener(_setAudioVolumeValue);
+    _settingsChanged = false;
   }
 
   @override
@@ -100,6 +106,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _dbMaxValue) {
       setState(() {
         _currentDbValue = double.parse(dbTresholdController.text).round();
+        _settingsChanged = true;
       });
     }
   }
@@ -111,6 +118,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _perSecMaxValue) {
       setState(() {
         _currentPerSecValue = double.parse(perSecController.text).round();
+        _settingsChanged = true;
       });
     }
   }
@@ -123,6 +131,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       setState(() {
         _currentTimeSampleValue =
             double.parse(timeSampleController.text).round();
+        _settingsChanged = true;
       });
     }
   }
@@ -134,6 +143,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _timeoutMaxValue) {
       setState(() {
         _currentTimeoutValue = double.parse(timeoutController.text).round();
+        _settingsChanged = true;
       });
     }
   }
@@ -146,6 +156,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       setState(() {
         _currentAudioVolumeValue =
             double.parse(audioVolumeController.text).round();
+        _settingsChanged = true;
       });
     }
   }
@@ -262,12 +273,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
     setState(() {
       _currentAudioName1 = path;
+      _settingsChanged = true;
     });
   }
 
   void removeAudio1() {
     setState(() {
       _currentAudioName1 = audioString;
+      _settingsChanged = true;
     });
   }
 
@@ -383,12 +396,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
     setState(() {
       _currentAudioName2 = path;
+      _settingsChanged = true;
     });
   }
 
   void removeAudio2() {
     setState(() {
       _currentAudioName2 = audioString;
+      _settingsChanged = true;
     });
   }
 
@@ -504,12 +519,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
     setState(() {
       _currentAudioName3 = path;
+      _settingsChanged = true;
     });
   }
 
   void removeAudio3() {
     setState(() {
       _currentAudioName3 = audioString;
+      _settingsChanged = true;
     });
   }
 
@@ -536,6 +553,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       prefs.setString("audioname1Value", _currentAudioName1);
       prefs.setString("audioname2Value", _currentAudioName2);
       prefs.setString("audioname3Value", _currentAudioName3);
+      _settingsChanged = false;
       Scaffold.of(context).showSnackBar(SnackBar(
         content: Text(
           AppLocalizations.of(context)
@@ -545,6 +563,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: Colors.greenAccent[400],
         duration: Duration(seconds: 2),
       ));
+    }
+  }
+
+  void saveSettingsValuesOnBackKey(context) async {
+    if (_currentAudioName1 == audioString) {
+      print("error!");
+    } else {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setInt("dbValue", _currentDbValue);
+      prefs.setInt("persecValue", _currentPerSecValue);
+      prefs.setString("persecUnit", _persecUnit);
+      prefs.setInt("timesampleValue", _currentTimeSampleValue);
+      prefs.setString("timesampleUnit", _timesampleUnit);
+      prefs.setInt("timeoutValue", _currentTimeoutValue);
+      prefs.setString("timeoutUnit", _timeoutUnit);
+      prefs.setInt("audiovolumeValue", _currentAudioVolumeValue);
+      prefs.setString("audioname1Value", _currentAudioName1);
+      prefs.setString("audioname2Value", _currentAudioName2);
+      prefs.setString("audioname3Value", _currentAudioName3);
+      _settingsChanged = false;
     }
   }
 
@@ -560,43 +598,81 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _currentAudioName1 = "audio/Grocery-Scanning.mp3";
       _currentAudioName2 = "audio/Foghorn.mp3";
       _currentAudioName3 = "audio/Censor-beep-3.mp3";
-      _currentAudioVolumeValue = 70;
+      _currentAudioVolumeValue = 83;
+      _settingsChanged = true;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _bgColor,
-      drawer: MyDrawer(),
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context).translate('settings_string')),
-        backgroundColor: Colors.blue,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(children: [
-            dBTreshold(context),
-            Visibility(
-              child: Column(
-                children: [
-                  perSec(context),
-                  timeFrame(context),
-                  timeout(context),
-                ],
+    return WillPopScope(
+      onWillPop: () async {
+        if (_settingsChanged) {
+          return showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text("Do you want to save changed settings?"),
+                  actions: [
+                    FlatButton(
+                      child: Text(
+                          AppLocalizations.of(context).translate("no_string")),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pushReplacementNamed(context, "/");
+                        return false;
+                      },
+                    ),
+                    FlatButton(
+                      child: Text(
+                          AppLocalizations.of(context).translate("yes_string")),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        saveSettingsValuesOnBackKey(context);
+                        Navigator.pushReplacementNamed(context, "/");
+                        return false;
+                      },
+                    )
+                  ],
+                );
+              });
+        }
+        Navigator.pushReplacementNamed(context, "/");
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: _bgColor,
+        drawer: MyDrawer(),
+        appBar: AppBar(
+          title:
+              Text(AppLocalizations.of(context).translate('settings_string')),
+          backgroundColor: Colors.blue,
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(children: [
+              dBTreshold(context),
+              Visibility(
+                child: Column(
+                  children: [
+                    perSec(context),
+                    timeFrame(context),
+                    timeout(context),
+                  ],
+                ),
+                visible: _advancedSettings,
               ),
-              visible: _advancedSettings,
-            ),
-            soundVolume(context),
-            audio(context),
-            Visibility(
-              child: defaultSettings(context),
-              visible: _advancedSettings,
-            ),
-            ButtonTheme(minWidth: 165, child: saveSettingsBuilder()),
-            advancedSettings(context),
-          ]),
+              soundVolume(context),
+              audio(context),
+              Visibility(
+                child: defaultSettings(context),
+                visible: _advancedSettings,
+              ),
+              ButtonTheme(minWidth: 165, child: saveSettingsBuilder()),
+              advancedSettings(context),
+            ]),
+          ),
         ),
       ),
     );
@@ -618,7 +694,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           child: _advancedSettings
               ? Text(
-                  AppLocalizations.of(context).translate('close_string'),
+                  AppLocalizations.of(context)
+                      .translate('advanced_settings_close_string'),
                   style: TextStyle(fontWeight: FontWeight.bold),
                 )
               : Text(
@@ -636,14 +713,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Widget saveButton = FlatButton(
       child: Text(AppLocalizations.of(context).translate('save_1_string')),
       onPressed: () {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true);
         saveSettingsValues(context);
       },
     );
     Widget cancelButton = FlatButton(
       child: Text(AppLocalizations.of(context).translate('cancel_string')),
       onPressed: () {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(false);
       },
     ); // set up the AlertDialog
     AlertDialog alert = AlertDialog(
@@ -651,8 +728,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       content: Text(
           AppLocalizations.of(context).translate('save_dialog_desc_string')),
       actions: [
-        saveButton,
         cancelButton,
+        saveButton,
       ],
     ); // show the dialog
     showDialog(
@@ -797,8 +874,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: sliderBoxDecoration(),
       child: Column(
         children: [
-          Text(AppLocalizations.of(context).translate('db_treshold_string'),
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(AppLocalizations.of(context).translate('db_treshold_string'),
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Container(
+                padding: EdgeInsets.only(left: 8.0),
+                width: 35,
+                child: TextField(
+                  controller: dbTresholdController,
+                  decoration:
+                      InputDecoration(border: InputBorder.none, hintText: '0'),
+                  onChanged: (String text) {
+                    if (double.parse(text) >= _dbMinValue &&
+                        double.parse(text) <= _dbMaxValue) {
+                      setState(() {
+                        _currentDbValue = int.parse(text);
+                      });
+                    }
+                  },
+                ),
+              ),
+              Container(
+                  child: Text(
+                "dB",
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              ))
+            ],
+          ),
           dBTresholdSliderControl(_dbMinValue, _dbMaxValue),
         ],
       ),
@@ -950,6 +1056,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Row dBTresholdSliderControl(double minVal, double maxVal) {
     return Row(
       children: [
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _currentDbValue--;
+              dbTresholdController.text = _currentDbValue.toString();
+            });
+          },
+          child: Icon(Icons.remove),
+        ),
         Flexible(
           child: Slider(
               min: minVal,
@@ -964,29 +1079,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 });
               }),
         ),
-        Container(
-          width: 30,
-          child: TextField(
-            controller: dbTresholdController,
-            decoration:
-                InputDecoration(border: InputBorder.none, hintText: '0'),
-            onChanged: (String text) {
-              if (double.parse(text) >= minVal &&
-                  double.parse(text) <= maxVal) {
-                setState(() {
-                  _currentDbValue = int.parse(text);
-                });
-              }
-            },
-          ),
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _currentDbValue++;
+              dbTresholdController.text = _currentDbValue.toString();
+            });
+          },
+          child: Icon(Icons.add),
         ),
-        Container(
-            child: Text(
-          "dB",
-          style: TextStyle(
-            fontSize: 18,
-          ),
-        ))
       ],
     );
   }

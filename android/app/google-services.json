@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "700799695684",
+    "project_id": "snortytesting",
+    "storage_bucket": "snortytesting.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:700799695684:android:43cd801148040ccb7e7511",
+        "android_client_info": {
+          "package_name": "com.snortytest.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "700799695684-q7koss6gsv276dpo8ohetmv4ib5s7evi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3mpa5CfrF-T0CaGMfBJe5BXnx1-YOw9o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "700799695684-q7koss6gsv276dpo8ohetmv4ib5s7evi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-4998785370755707~2117070259"
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -43,5 +43,7 @@
 	<false/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>${PRODUCT_NAME} need microphone use to get decibel value around you</string>
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-4998785370755707~2117070259</string>
 </dict>
 </plist>

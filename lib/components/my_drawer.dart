@@ -5,9 +5,9 @@ import 'package:flutter_email_sender/flutter_email_sender.dart';
 import '../app_localizations.dart';
 
 class MyDrawer extends StatelessWidget {
-  const MyDrawer({
-    Key key,
-  }) : super(key: key);
+  final VoidCallback stopSound;
+
+  MyDrawer({this.stopSound});
 
   void sendMail(context) async {
     final Email email = Email(
@@ -42,8 +42,12 @@ class MyDrawer extends StatelessWidget {
               if (ModalRoute.of(context).settings.name == '/') {
                 Navigator.pop(context);
               } else {
+                if (ModalRoute.of(context).settings.name == '/tools') {
+                  stopSound();
+                }
+
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/');
+                Navigator.pushReplacementNamed(context, '/');
               }
             },
           ),
@@ -57,7 +61,7 @@ class MyDrawer extends StatelessWidget {
                 Navigator.pop(context);
               } else {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/tools');
+                Navigator.pushReplacementNamed(context, '/tools');
               }
             },
           ),
@@ -70,8 +74,12 @@ class MyDrawer extends StatelessWidget {
               if (ModalRoute.of(context).settings.name == '/settings') {
                 Navigator.pop(context);
               } else {
+                if (ModalRoute.of(context).settings.name == '/tools') {
+                  stopSound();
+                }
+
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/settings');
+                Navigator.pushReplacementNamed(context, '/settings');
               }
             },
           ),
@@ -83,8 +91,12 @@ class MyDrawer extends StatelessWidget {
               if (ModalRoute.of(context).settings.name == '/help') {
                 Navigator.pop(context);
               } else {
+                if (ModalRoute.of(context).settings.name == '/tools') {
+                  stopSound();
+                }
+
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/help');
+                Navigator.pushReplacementNamed(context, '/help');
               }
             },
           ),
@@ -96,37 +108,53 @@ class MyDrawer extends StatelessWidget {
               if (ModalRoute.of(context).settings.name == '/about') {
                 Navigator.pop(context);
               } else {
+                if (ModalRoute.of(context).settings.name == '/tools') {
+                  stopSound();
+                }
+
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/about');
+                Navigator.pushReplacementNamed(context, '/about');
               }
             },
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              FlatButton(
-                  onPressed: () {
-                    Share.share(
-                        AppLocalizations.of(context).translate('share_string'));
-                  },
-                  child: Row(
-                    children: [
-                      Icon(Icons.share),
-                      Text(AppLocalizations.of(context)
-                          .translate('share_menu_string'))
-                    ],
-                  )),
-              FlatButton(
-                  onPressed: () {
-                    sendMail(context);
-                  },
-                  child: Row(
-                    children: [
-                      Icon(Icons.email),
-                      Text(AppLocalizations.of(context)
-                          .translate('email_menu_string'))
-                    ],
-                  ))
+              TextButton(
+                onPressed: () {
+                  if (ModalRoute.of(context).settings.name == '/tools') {
+                    stopSound();
+                  }
+                  /*Share.share(
+                      AppLocalizations.of(context).translate('share_string'));*/
+                },
+                child: Row(
+                  children: [
+                    Icon(Icons.share),
+                    Text(AppLocalizations.of(context)
+                        .translate('share_menu_string'))
+                  ],
+                ),
+                style: ButtonStyle(
+                    foregroundColor: MaterialStateProperty.all(Colors.black)),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (ModalRoute.of(context).settings.name == '/tools') {
+                    stopSound();
+                  }
+                  sendMail(context);
+                },
+                child: Row(
+                  children: [
+                    Icon(Icons.email),
+                    Text(AppLocalizations.of(context)
+                        .translate('email_menu_string'))
+                  ],
+                ),
+                style: ButtonStyle(
+                    foregroundColor: MaterialStateProperty.all(Colors.black)),
+              )
             ],
           ),
           Divider(
@@ -136,8 +164,12 @@ class MyDrawer extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text(AppLocalizations.of(context).translate('exit_string')),
-            onTap: () =>
-                SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
+            onTap: () {
+              if (ModalRoute.of(context).settings.name == '/tools') {
+                stopSound();
+              }
+              SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+            },
           ),
         ],
       ),

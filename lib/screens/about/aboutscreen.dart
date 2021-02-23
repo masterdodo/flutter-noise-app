@@ -12,13 +12,19 @@ class _AboutScreenState extends State<AboutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _bgColor,
-      drawer: MyDrawer(),
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context).translate('about_string')),
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pushReplacementNamed(context, "/");
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: _bgColor,
+        drawer: MyDrawer(),
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context).translate('about_string')),
+        ),
+        body: Text("About"),
       ),
-      body: Text("About"),
     );
   }
 }

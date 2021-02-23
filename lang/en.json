@@ -26,6 +26,7 @@
     "exit_string": "Exit",
     "default_settings_string": "Default settings",
     "advanced_settings_string": "More settings",
+    "advanced_settings_close_string": "Less settings",
     "close_string": "Close",
     "help_intro_string": "You can use the preset values or adjust them to your liking.",
     "on_off_string": "On/Off",
@@ -44,5 +45,8 @@
     "save_1_string": "Save",
     "save_dialog_desc_string": "Are you sure you want to save this settings?",
     "share_menu_string": "Share",
-    "email_menu_string": "Send us Email"
+    "email_menu_string": "Send us Email",
+    "yes_string": "Yes",
+    "no_string": "No",
+    "exit_app_string": "Do you really want to exit the app?"
 }
