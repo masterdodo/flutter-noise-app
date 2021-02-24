@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:noise_app/app_localizations.dart';
 import 'package:noise_app/components/my_drawer.dart';
 import 'package:noise_meter/noise_meter.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class ToolsScreen extends StatefulWidget {
   @override
@@ -20,6 +21,8 @@ class _ToolsScreenState extends State<ToolsScreen> {
 
   String maxDb;
   String meanDb;
+  String maxDbValue;
+  String minDbValue;
   String stopwatchDisplay;
 
   Color _bgColor;
@@ -32,8 +35,11 @@ class _ToolsScreenState extends State<ToolsScreen> {
     _isRunning = false;
     maxDb = "30.00";
     meanDb = "30.00";
+    maxDbValue = "30.00";
+    minDbValue = "150.00";
     stopwatchDisplay = "00:00:00";
     _bgColor = Colors.white;
+    this.start();
   }
 
   @override
@@ -79,6 +85,12 @@ class _ToolsScreenState extends State<ToolsScreen> {
     setState(() {
       this.maxDb = noiseReading.maxDecibel.toStringAsFixed(2);
       this.meanDb = noiseReading.meanDecibel.toStringAsFixed(2);
+      if (noiseReading.meanDecibel > double.parse(maxDbValue)) {
+        this.maxDbValue = noiseReading.meanDecibel.toStringAsFixed(2);
+      }
+      if (noiseReading.meanDecibel < double.parse(minDbValue)) {
+        this.minDbValue = noiseReading.meanDecibel.toStringAsFixed(2);
+      }
     });
   }
 
@@ -157,12 +169,21 @@ class _ToolsScreenState extends State<ToolsScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
+                    Text(""),
                     Text(
-                      AppLocalizations.of(context)
-                          .translate('average_noise_string'),
-                      style: TextStyle(fontWeight: FontWeight.normal),
+                      "MIN",
+                      style: TextStyle(color: Colors.blue),
                     ),
-                    RaisedButton(
+                    Text(
+                      "MAX",
+                      style: TextStyle(color: Colors.blue),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    /*RaisedButton(
                       padding: EdgeInsets.all(15),
                       onPressed: _isRecording ? this.stop : this.start,
                       color: _isRecording ? Colors.red : Colors.green,
@@ -170,7 +191,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
                       child: _isRecording
                           ? Icon(Icons.stop)
                           : Icon(Icons.play_arrow),
-                    ),
+                    ),*/
                     Text(
                       this.meanDb,
                       style: TextStyle(
@@ -178,11 +199,65 @@ class _ToolsScreenState extends State<ToolsScreen> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                    Text(
+                      this.minDbValue,
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      this.maxDbValue,
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ],
+                ),
+                Container(
+                  height: 200,
+                  child: SfRadialGauge(
+                      enableLoadingAnimation: true,
+                      axes: <RadialAxis>[
+                        RadialAxis(
+                            minimum: 30,
+                            maximum: 120,
+                            ranges: <GaugeRange>[
+                              GaugeRange(
+                                  startValue: 30,
+                                  endValue: 60,
+                                  color: Colors.green),
+                              GaugeRange(
+                                  startValue: 60,
+                                  endValue: 90,
+                                  color: Colors.orange),
+                              GaugeRange(
+                                  startValue: 90,
+                                  endValue: 120,
+                                  color: Colors.red)
+                            ],
+                            pointers: <GaugePointer>[
+                              NeedlePointer(
+                                enableAnimation: true,
+                                value: double.parse(this.meanDb),
+                              ),
+                            ],
+                            annotations: <GaugeAnnotation>[
+                              GaugeAnnotation(
+                                  widget: Container(
+                                      child: Text(this.meanDb,
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold))),
+                                  angle: 90,
+                                  positionFactor: 0.6)
+                            ])
+                      ]),
                 ),
                 Divider(
                   color: Colors.transparent,
-                  height: 20,
+                  height: 10,
                 ),
                 Padding(
                     padding: const EdgeInsets.only(top: 25, bottom: 20),
