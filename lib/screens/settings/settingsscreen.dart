@@ -37,6 +37,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   bool _advancedSettings = false;
   bool _settingsChanged = false;
+  bool _audioActive1 = true;
+  bool _audioActive2 = false;
+  bool _audioActive3 = false;
   bool _standbyValue = false;
   bool _algorithmValue = false;
   bool _proVersion = false;
@@ -95,8 +98,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       timeoutController.text = _currentTimeoutValue.round().toString();
       audioVolumeController.text = _currentAudioVolumeValue.round().toString();
       _currentAudioName1 = prefs.getString("audioname1Value") ?? audioString;
+      _audioActive1 = prefs.getBool("audioActive1") ?? true;
       _currentAudioName2 = prefs.getString("audioname2Value") ?? audioString;
+      _audioActive2 = prefs.getBool("audioActive2") ?? false;
       _currentAudioName3 = prefs.getString("audioname3Value") ?? audioString;
+      _audioActive3 = prefs.getBool("audioActive3") ?? false;
       _persecUnit = prefs.getString("persecUnit") ?? 'sec';
       _timesampleUnit = prefs.getString("timesampleUnit") ?? 'sec';
       _timeoutUnit = prefs.getString("timeoutUnit") ?? 'sec';
@@ -571,8 +577,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       prefs.setString("timeoutUnit", _timeoutUnit);
       prefs.setInt("audiovolumeValue", _currentAudioVolumeValue);
       prefs.setString("audioname1Value", _currentAudioName1);
+      prefs.setBool("audioActive1", _audioActive1);
       prefs.setString("audioname2Value", _currentAudioName2);
+      prefs.setBool("audioActive2", _audioActive2);
       prefs.setString("audioname3Value", _currentAudioName3);
+      prefs.setBool("audioActive3", _audioActive3);
       prefs.setBool("standbyValue", _standbyValue);
       prefs.setBool("algorithmValue", _algorithmValue);
       _settingsChanged = false;
@@ -842,21 +851,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           audioChooseControl1(),
-          AbsorbPointer(
-            absorbing: !(_currentAudioName1 != audioString),
-            child: Opacity(
-                opacity: (_currentAudioName1 != audioString) ? 1 : 0.3,
-                child: audioChooseControl2()),
-          ),
-          AbsorbPointer(
-            absorbing: !(_currentAudioName1 != audioString &&
-                _currentAudioName2 != audioString),
-            child: Opacity(
-                opacity: (_currentAudioName1 != audioString &&
-                        _currentAudioName2 != audioString)
-                    ? 1
-                    : 0.3,
-                child: audioChooseControl3()),
+          GestureDetector(
+            onTap: (_proVersion)
+                ? (() {})
+                : (() {
+                    Fluttertoast.cancel();
+                    Fluttertoast.showToast(
+                        msg: AppLocalizations.of(context)
+                            .translate("pro_string"),
+                        toastLength: Toast.LENGTH_SHORT);
+                  }),
+            child: Column(
+              children: [
+                AbsorbPointer(
+                  absorbing: (!_proVersion),
+                  child: Opacity(
+                      opacity: (_proVersion) ? 1 : 0.3,
+                      child: audioChooseControl2()),
+                ),
+                AbsorbPointer(
+                  absorbing: (!_proVersion),
+                  child: Opacity(
+                      opacity: (_proVersion) ? 1 : 0.3,
+                      child: audioChooseControl3()),
+                )
+              ],
+            ),
           ),
         ],
       ),
@@ -1209,35 +1229,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          width: 40,
-          height: 50,
-          child: IconButton(
-            icon: Icon(
-              Icons.file_upload,
-              color: Colors.blue,
-            ),
-            onPressed: () => showAlertDialog1(context),
-          ),
-        ),
         Flexible(
-          child: GestureDetector(
-            onTap: () => showAlertDialog1(context),
-            child: Text((_currentAudioName1 != audioString &&
-                    _currentAudioName1 != null)
-                ? (_currentAudioName1
-                    .split("/")[_currentAudioName1.split("/").length - 1])
-                : AppLocalizations.of(context)
-                    .translate('choose_sound_string')),
+          child: AbsorbPointer(
+            absorbing: !_audioActive1,
+            child: Opacity(
+              opacity: (_audioActive1) ? 1 : 0.3,
+              child: GestureDetector(
+                onTap: () => showAlertDialog1(context),
+                child: Text((_currentAudioName1 != audioString &&
+                        _currentAudioName1 != null)
+                    ? (_currentAudioName1
+                        .split("/")[_currentAudioName1.split("/").length - 1])
+                    : AppLocalizations.of(context)
+                        .translate('choose_sound_string')),
+              ),
+            ),
           ),
         ),
-        Container(
-          width: 40,
-          height: 50,
-          child: Text(""),
-        )
+        Checkbox(
+          value: _audioActive1,
+          onChanged: _setActiveAudio1,
+        ),
       ],
     );
+  }
+
+  void _setActiveAudio1(bool val) {
+    if (_audioActive2 || _audioActive3) {
+      setState(() {
+        _audioActive1 = val;
+        _settingsChanged = true;
+      });
+    }
   }
 
 // Widget for audio chooser 2
@@ -1245,44 +1268,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          width: 40,
-          height: 50,
-          child: IconButton(
-            icon: Icon(Icons.file_upload, color: Colors.blue),
-            onPressed: () => showAlertDialog2(context),
-          ),
-        ),
         Flexible(
-          child: GestureDetector(
-            onTap: () => showAlertDialog2(context),
-            child: Text((_currentAudioName2 != audioString &&
-                    _currentAudioName2 != null)
-                ? (_currentAudioName2
-                    .split("/")[_currentAudioName2.split("/").length - 1])
-                : AppLocalizations.of(context)
-                    .translate('choose_sound_string')),
+          child: AbsorbPointer(
+            absorbing: !_audioActive2,
+            child: Opacity(
+              opacity: (_audioActive2) ? 1 : 0.3,
+              child: GestureDetector(
+                onTap: () => showAlertDialog2(context),
+                child: Text((_currentAudioName2 != audioString &&
+                        _currentAudioName2 != null)
+                    ? (_currentAudioName2
+                        .split("/")[_currentAudioName2.split("/").length - 1])
+                    : AppLocalizations.of(context)
+                        .translate('choose_sound_string')),
+              ),
+            ),
           ),
         ),
-        Container(
-          width: 40,
-          height: 50,
-          child: IconButton(
-            icon: Icon(
-              Icons.delete,
-              color: (_currentAudioName3 == audioString &&
-                      _currentAudioName2 != audioString)
-                  ? Colors.blue
-                  : Colors.grey,
-            ),
-            onPressed: (_currentAudioName3 == audioString &&
-                    _currentAudioName2 != audioString)
-                ? () => removeAudio2()
-                : null,
-          ),
-        )
+        Checkbox(
+          value: _audioActive2,
+          onChanged: _setActiveAudio2,
+        ),
       ],
     );
+  }
+
+  void _setActiveAudio2(bool val) {
+    if (_audioActive1 || _audioActive3) {
+      setState(() {
+        _audioActive2 = val;
+        _settingsChanged = true;
+      });
+    }
   }
 
   // Widget for audio chooser 3
@@ -1290,41 +1307,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          width: 40,
-          height: 50,
-          child: IconButton(
-            icon: Icon(Icons.file_upload, color: Colors.blue),
-            onPressed: () => showAlertDialog3(context),
-          ),
-        ),
         Flexible(
-          child: GestureDetector(
-              onTap: () => showAlertDialog3(context),
-              child: Text((_currentAudioName3 != audioString &&
-                      _currentAudioName3 != null)
-                  ? (_currentAudioName3
-                      .split("/")[_currentAudioName3.split("/").length - 1])
-                  : AppLocalizations.of(context)
-                      .translate('choose_sound_string'))),
-        ),
-        Container(
-          width: 40,
-          height: 50,
-          child: IconButton(
-            icon: Icon(
-              Icons.delete,
-              color: (_currentAudioName3 != audioString)
-                  ? Colors.blue
-                  : Colors.grey,
+          child: AbsorbPointer(
+            absorbing: !_audioActive3,
+            child: Opacity(
+              opacity: (_audioActive3) ? 1 : 0.3,
+              child: GestureDetector(
+                  onTap: () => showAlertDialog3(context),
+                  child: Text((_currentAudioName3 != audioString &&
+                          _currentAudioName3 != null)
+                      ? (_currentAudioName3
+                          .split("/")[_currentAudioName3.split("/").length - 1])
+                      : AppLocalizations.of(context)
+                          .translate('choose_sound_string'))),
             ),
-            onPressed: (_currentAudioName3 != audioString)
-                ? () => removeAudio3()
-                : null,
           ),
-        )
+        ),
+        Checkbox(
+          value: _audioActive3,
+          onChanged: _setActiveAudio3,
+        ),
       ],
     );
+  }
+
+  void _setActiveAudio3(bool val) {
+    if (_audioActive1 || _audioActive2) {
+      setState(() {
+        _audioActive3 = val;
+        _settingsChanged = true;
+      });
+    }
   }
 
   // Widget for dB slider
