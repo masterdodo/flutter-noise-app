@@ -52,5 +52,8 @@
     "exit_app_string": "Ali res želite zapreti aplikacijo?",
     "standby_string": "Standby",
     "pro_string": "Ta funkcija bo na voljo v pro različici.",
-    "algorithm_string": "Najboljši zvok - Algoritem"
+    "algorithm_string": "Menjevanje",
+    "one_sound_string": "Vsaj en zvok mora biti vklopljen.",
+    "hourly_string": "Statistika po urah",
+    "footage_string": "Zvočni posnetki in grafi"
 }

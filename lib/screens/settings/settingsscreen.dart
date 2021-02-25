@@ -40,8 +40,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _audioActive1 = true;
   bool _audioActive2 = false;
   bool _audioActive3 = false;
-  bool _standbyValue = false;
   bool _algorithmValue = false;
+  bool _standbyValue = false;
+  bool _hourlyValue = false;
+  bool _footageValue = false;
+
   bool _proVersion = false;
 
   String _persecUnit = "sec";
@@ -106,8 +109,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _persecUnit = prefs.getString("persecUnit") ?? 'sec';
       _timesampleUnit = prefs.getString("timesampleUnit") ?? 'sec';
       _timeoutUnit = prefs.getString("timeoutUnit") ?? 'sec';
-      _standbyValue = prefs.getBool("standbyValue") ?? false;
       _algorithmValue = prefs.getBool("algorithmValue") ?? false;
+      _standbyValue = prefs.getBool("standbyValue") ?? false;
+      _hourlyValue = prefs.getBool("hourlyValue") ?? false;
+      _footageValue = prefs.getBool("footageValue") ?? false;
     });
   }
 
@@ -183,6 +188,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
   _setAlgorithmValue() {
     setState(() {
       _algorithmValue = !_algorithmValue;
+      if (!_algorithmValue) {
+        _audioActive1 = true;
+        _audioActive2 = false;
+        _audioActive3 = false;
+      }
+      _settingsChanged = true;
+    });
+  }
+
+  _setHourlyValue() {
+    setState(() {
+      _hourlyValue = !_hourlyValue;
+      _settingsChanged = true;
+    });
+  }
+
+  _setFootageValue() {
+    setState(() {
+      _footageValue = !_footageValue;
       _settingsChanged = true;
     });
   }
@@ -582,8 +606,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       prefs.setBool("audioActive2", _audioActive2);
       prefs.setString("audioname3Value", _currentAudioName3);
       prefs.setBool("audioActive3", _audioActive3);
-      prefs.setBool("standbyValue", _standbyValue);
       prefs.setBool("algorithmValue", _algorithmValue);
+      prefs.setBool("standbyValue", _standbyValue);
+      prefs.setBool("hourlyValue", _hourlyValue);
+      prefs.setBool("footageValue", _footageValue);
       _settingsChanged = false;
       Scaffold.of(context).showSnackBar(SnackBar(
         content: Text(
@@ -613,8 +639,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       prefs.setString("audioname1Value", _currentAudioName1);
       prefs.setString("audioname2Value", _currentAudioName2);
       prefs.setString("audioname3Value", _currentAudioName3);
-      prefs.setBool("standbyValue", _standbyValue);
       prefs.setBool("algorithmValue", _algorithmValue);
+      prefs.setBool("standbyValue", _standbyValue);
+      prefs.setBool("hourlyValue", _hourlyValue);
+      prefs.setBool("footageValue", _footageValue);
       _settingsChanged = false;
     }
   }
@@ -632,8 +660,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _currentAudioName2 = "audio/Foghorn.mp3";
       _currentAudioName3 = "audio/Censor-beep-3.mp3";
       _currentAudioVolumeValue = 83;
-      _standbyValue = false;
       _algorithmValue = false;
+      _standbyValue = false;
+      _hourlyValue = false;
+      _footageValue = false;
       _settingsChanged = true;
     });
   }
@@ -702,7 +732,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
               soundVolume(context),
               setupAlgorithm(context),
               audio(context),
-              setupStandby(context),
+              Visibility(
+                visible: _advancedSettings,
+                child: Column(
+                  children: [
+                    setupStandby(context),
+                    setupHourlyStats(context),
+                    setupFootageAudioGraphs(context),
+                  ],
+                ),
+              ),
               Visibility(
                 child: defaultSettings(context),
                 visible: _advancedSettings,
@@ -741,6 +780,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
               }),
         child:
             AbsorbPointer(absorbing: !_proVersion, child: algorithm(context)));
+  }
+
+  GestureDetector setupHourlyStats(BuildContext context) {
+    return GestureDetector(
+        onTap: (_proVersion)
+            ? (() {})
+            : (() {
+                Fluttertoast.cancel();
+                Fluttertoast.showToast(
+                    msg: AppLocalizations.of(context).translate("pro_string"),
+                    toastLength: Toast.LENGTH_SHORT);
+              }),
+        child: AbsorbPointer(
+            absorbing: !_proVersion, child: hourlyStats(context)));
+  }
+
+  GestureDetector setupFootageAudioGraphs(BuildContext context) {
+    return GestureDetector(
+        onTap: (_proVersion)
+            ? (() {})
+            : (() {
+                Fluttertoast.cancel();
+                Fluttertoast.showToast(
+                    msg: AppLocalizations.of(context).translate("pro_string"),
+                    toastLength: Toast.LENGTH_SHORT);
+              }),
+        child: AbsorbPointer(
+            absorbing: !_proVersion, child: footageAudioGraphs(context)));
   }
 
   Container advancedSettings(BuildContext context) {
@@ -864,15 +931,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               children: [
                 AbsorbPointer(
-                  absorbing: (!_proVersion),
+                  absorbing: (!_proVersion || !_algorithmValue),
                   child: Opacity(
-                      opacity: (_proVersion) ? 1 : 0.3,
+                      opacity: (_proVersion && _algorithmValue) ? 1 : 0.3,
                       child: audioChooseControl2()),
                 ),
                 AbsorbPointer(
-                  absorbing: (!_proVersion),
+                  absorbing: (!_proVersion || !_algorithmValue),
                   child: Opacity(
-                      opacity: (_proVersion) ? 1 : 0.3,
+                      opacity: (_proVersion && _algorithmValue) ? 1 : 0.3,
                       child: audioChooseControl3()),
                 )
               ],
@@ -1058,7 +1125,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: EdgeInsets.all(5),
       decoration: sliderBoxDecoration(),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             AppLocalizations.of(context).translate("standby_string"),
@@ -1082,7 +1149,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: EdgeInsets.all(5),
       decoration: sliderBoxDecoration(),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             AppLocalizations.of(context).translate("algorithm_string"),
@@ -1094,6 +1161,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Switch(
             value: _algorithmValue,
             onChanged: (_proVersion) ? (val) => _setAlgorithmValue() : null,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Container hourlyStats(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 20),
+      padding: EdgeInsets.all(5),
+      decoration: sliderBoxDecoration(),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            AppLocalizations.of(context).translate("hourly_string"),
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          SizedBox(
+            width: 20,
+          ),
+          Switch(
+            value: _hourlyValue,
+            onChanged: (_proVersion) ? (val) => _setHourlyValue() : null,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Container footageAudioGraphs(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 20),
+      padding: EdgeInsets.all(5),
+      decoration: sliderBoxDecoration(),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            AppLocalizations.of(context).translate("footage_string"),
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          SizedBox(
+            width: 20,
+          ),
+          Switch(
+            value: _footageValue,
+            onChanged: (_proVersion) ? (val) => _setFootageValue() : null,
           ),
         ],
       ),

@@ -52,5 +52,8 @@
     "exit_app_string": "Do you really want to exit the app?",
     "standby_string": "Standby",
     "pro_string": "This feature is going to be available in pro version.",
-    "algorithm_string": "Best sound - Algorithm"
+    "algorithm_string": "Switching",
+    "one_sound_string": "At least one sound has to be enabled.",
+    "hourly_string": "Hourly statistics",
+    "footage_string": "Audio footage and graphs"
 }
