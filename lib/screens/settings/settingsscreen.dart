@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:noise_app/components/my_drawer.dart';
 import 'package:noise_app/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:async';
 
 class SettingsScreen extends StatefulWidget {
@@ -36,6 +37,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   bool _advancedSettings = false;
   bool _settingsChanged = false;
+  bool _standbyValue = false;
+  bool _algorithmValue = false;
+  bool _proVersion = false;
 
   String _persecUnit = "sec";
   String _timesampleUnit = "sec";
@@ -96,6 +100,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _persecUnit = prefs.getString("persecUnit") ?? 'sec';
       _timesampleUnit = prefs.getString("timesampleUnit") ?? 'sec';
       _timeoutUnit = prefs.getString("timeoutUnit") ?? 'sec';
+      _standbyValue = prefs.getBool("standbyValue") ?? false;
+      _algorithmValue = prefs.getBool("algorithmValue") ?? false;
     });
   }
 
@@ -159,6 +165,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _settingsChanged = true;
       });
     }
+  }
+
+  _setStandbyValue() {
+    setState(() {
+      _standbyValue = !_standbyValue;
+      _settingsChanged = true;
+    });
+  }
+
+  _setAlgorithmValue() {
+    setState(() {
+      _algorithmValue = !_algorithmValue;
+      _settingsChanged = true;
+    });
   }
 
   showAlertDialog1(BuildContext context) {
@@ -553,6 +573,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       prefs.setString("audioname1Value", _currentAudioName1);
       prefs.setString("audioname2Value", _currentAudioName2);
       prefs.setString("audioname3Value", _currentAudioName3);
+      prefs.setBool("standbyValue", _standbyValue);
+      prefs.setBool("algorithmValue", _algorithmValue);
       _settingsChanged = false;
       Scaffold.of(context).showSnackBar(SnackBar(
         content: Text(
@@ -582,6 +604,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       prefs.setString("audioname1Value", _currentAudioName1);
       prefs.setString("audioname2Value", _currentAudioName2);
       prefs.setString("audioname3Value", _currentAudioName3);
+      prefs.setBool("standbyValue", _standbyValue);
+      prefs.setBool("algorithmValue", _algorithmValue);
       _settingsChanged = false;
     }
   }
@@ -599,6 +623,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _currentAudioName2 = "audio/Foghorn.mp3";
       _currentAudioName3 = "audio/Censor-beep-3.mp3";
       _currentAudioVolumeValue = 83;
+      _standbyValue = false;
+      _algorithmValue = false;
       _settingsChanged = true;
     });
   }
@@ -612,7 +638,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
-                  title: Text("Do you want to save changed settings?"),
+                  title: Text(AppLocalizations.of(context)
+                      .translate("save_dialog_back_key_string")),
                   actions: [
                     FlatButton(
                       child: Text(
@@ -664,7 +691,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 visible: _advancedSettings,
               ),
               soundVolume(context),
+              setupAlgorithm(context),
               audio(context),
+              setupStandby(context),
               Visibility(
                 child: defaultSettings(context),
                 visible: _advancedSettings,
@@ -676,6 +705,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
     );
+  }
+
+  GestureDetector setupStandby(BuildContext context) {
+    return GestureDetector(
+        onTap: (_proVersion)
+            ? (() {})
+            : (() {
+                Fluttertoast.cancel();
+                Fluttertoast.showToast(
+                    msg: AppLocalizations.of(context).translate("pro_string"),
+                    toastLength: Toast.LENGTH_SHORT);
+              }),
+        child: AbsorbPointer(absorbing: !_proVersion, child: standby(context)));
+  }
+
+  GestureDetector setupAlgorithm(BuildContext context) {
+    return GestureDetector(
+        onTap: (_proVersion)
+            ? (() {})
+            : (() {
+                Fluttertoast.cancel();
+                Fluttertoast.showToast(
+                    msg: AppLocalizations.of(context).translate("pro_string"),
+                    toastLength: Toast.LENGTH_SHORT);
+              }),
+        child:
+            AbsorbPointer(absorbing: !_proVersion, child: algorithm(context)));
   }
 
   Container advancedSettings(BuildContext context) {
@@ -971,6 +1027,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
           timeSampleSliderControl(_timeSampleMinValue, _timeSampleMaxValue),
+        ],
+      ),
+    );
+  }
+
+  Container standby(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 20),
+      padding: EdgeInsets.all(5),
+      decoration: sliderBoxDecoration(),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Text(
+            AppLocalizations.of(context).translate("standby_string"),
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          SizedBox(
+            width: 20,
+          ),
+          Switch(
+            value: _standbyValue,
+            onChanged: (_proVersion) ? (val) => _setStandbyValue() : null,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Container algorithm(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 20),
+      padding: EdgeInsets.all(5),
+      decoration: sliderBoxDecoration(),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Text(
+            AppLocalizations.of(context).translate("algorithm_string"),
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          SizedBox(
+            width: 20,
+          ),
+          Switch(
+            value: _algorithmValue,
+            onChanged: (_proVersion) ? (val) => _setAlgorithmValue() : null,
+          ),
         ],
       ),
     );

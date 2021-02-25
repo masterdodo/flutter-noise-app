@@ -44,9 +44,13 @@
     "snackbar_save_fail_string": "Settings not saved!",
     "save_1_string": "Save",
     "save_dialog_desc_string": "Are you sure you want to save this settings?",
+    "save_dialog_back_key_string": "Do you want to save changed settings?",
     "share_menu_string": "Share",
     "email_menu_string": "Send us Email",
     "yes_string": "Yes",
     "no_string": "No",
-    "exit_app_string": "Do you really want to exit the app?"
+    "exit_app_string": "Do you really want to exit the app?",
+    "standby_string": "Standby",
+    "pro_string": "This feature is going to be available in pro version.",
+    "algorithm_string": "Best sound - algorithm"
 }

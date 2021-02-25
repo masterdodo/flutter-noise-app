@@ -45,6 +45,8 @@ dependencies:
 
   firebase_admob: ^0.11.0+1
 
+  fluttertoast: ^7.1.8
+
   syncfusion_flutter_gauges: ^18.4.44
 
   syncfusion_flutter_charts: ^18.4.44+1

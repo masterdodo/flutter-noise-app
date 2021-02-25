@@ -44,9 +44,13 @@
     "snackbar_save_fail_string": "Nastavitve niso shranjene!",
     "save_1_string": "Shrani",
     "save_dialog_desc_string": "Ste prepričani, da želite shraniti te nastavitve?",
+    "save_dialog_back_key_string": "ALi želite shraniti spremenjene nastavitve?",
     "share_menu_string": "Deli",
     "email_menu_string": "Pošlji nam E-pošto",
     "yes_string": "Da",
     "no_string": "Ne",
-    "exit_app_string": "Ali res želite zapreti aplikacijo?"
+    "exit_app_string": "Ali res želite zapreti aplikacijo?",
+    "standby_string": "Standby",
+    "pro_string": "Ta funkcija bo na voljo v pro različici.",
+    "algorithm_string": "Najboljši zvok - algoritem"
 }
