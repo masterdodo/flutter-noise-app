@@ -74,7 +74,10 @@ class _HomeScreenState extends State<HomeScreen> {
     "audio/Bleep.mp3": 2,
     "audio/Censor-beep-3.mp3": 1,
     "audio/Foghorn.mp3": 5,
-    "audio/Grocery-Scanning.mp3": 4
+    "audio/Grocery-Scanning.mp3": 4,
+    "audio/Snort-1.mp3": 4,
+    "audio/Snort-2.m4a": 2,
+    "audio/Snort-3.m4a": 7
   };
 
   //ADS
@@ -148,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _activeTimeSampleUnit = prefs.getString("timesampleUnit") ?? 'sec';
     _activeTimeoutValue = prefs.getInt("timeoutValue") ?? 6;
     _activeTimeoutUnit = prefs.getString("timeoutUnit") ?? 'sec';
-    _activeAudioVolumeValue = prefs.getInt("audiovolumeValue") ?? 70;
+    _activeAudioVolumeValue = prefs.getInt("audiovolumeValue") ?? 83;
     _activeAudioFile1 =
         prefs.getString("audioname1Value") ?? 'audio/Grocery-Scanning.mp3';
     _activeAudioFile2 =

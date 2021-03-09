@@ -294,12 +294,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Text("Grocery Scanning"),
       color: Colors.blue[100],
     );
+    Widget dfSound5 = RaisedButton(
+      onPressed: () {
+        setState(() {
+          _currentAudioName1 = "audio/Snort-1.mp3";
+        });
+        Navigator.of(context).pop();
+      },
+      child: Text("Snort 1"),
+      color: Colors.blue[100],
+    );
+    Widget dfSound6 = RaisedButton(
+      onPressed: () {
+        setState(() {
+          _currentAudioName1 = "audio/Snort-2.m4a";
+        });
+        Navigator.of(context).pop();
+      },
+      child: Text("Snort 2"),
+      color: Colors.blue[100],
+    );
+    Widget dfSound7 = RaisedButton(
+      onPressed: () {
+        setState(() {
+          _currentAudioName1 = "audio/Snort-3.m4a";
+        });
+        Navigator.of(context).pop();
+      },
+      child: Text("Snort 3"),
+      color: Colors.blue[100],
+    );
 
     AlertDialog defaultSoundsDialog = AlertDialog(
       content: SizedBox(
         height: 200,
         child: ListView(
-          children: [dfSound1, dfSound2, dfSound3, dfSound4],
+          children: [
+            dfSound1,
+            dfSound2,
+            dfSound3,
+            dfSound4,
+            dfSound5,
+            dfSound6,
+            dfSound7
+          ],
         ),
       ),
     );
