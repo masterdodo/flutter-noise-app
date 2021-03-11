@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:noise_app/app_localizations.dart';
 import 'package:noise_app/components/my_drawer.dart';
 import 'package:noise_meter/noise_meter.dart';
@@ -23,8 +24,12 @@ class _ToolsScreenState extends State<ToolsScreen> {
   String meanDb;
   String maxDbValue;
   String minDbValue;
+  String avgDbValue;
   String stopwatchDisplay;
+  List<double> dBValueList = [];
+  int arrLength;
 
+  Timer timer;
   Color _bgColor;
 
   @override
@@ -37,7 +42,9 @@ class _ToolsScreenState extends State<ToolsScreen> {
     meanDb = "30.00";
     maxDbValue = "30.00";
     minDbValue = "150.00";
+    avgDbValue = "30.00";
     stopwatchDisplay = "00:00:00";
+    arrLength = 100;
     _bgColor = Colors.white;
     this.start();
   }
@@ -55,9 +62,36 @@ class _ToolsScreenState extends State<ToolsScreen> {
   void start() async {
     try {
       _noiseSubscription = _noiseMeter.noiseStream.listen(onData);
+      getdBData();
     } catch (exception) {
       print(exception);
     }
+  }
+
+  void getdBData() {
+    setState(() {
+      timer = Timer.periodic(Duration(milliseconds: 100), (Timer t) {
+        dBProcessor(meanDb);
+      });
+    });
+  }
+
+  void dBProcessor(text) {
+    if (dBValueList?.length == arrLength) {
+      dBValueList.removeAt(0);
+    }
+    if (text != null && text != "") {
+      dBValueList.add(double.parse(text));
+    }
+
+    double avg = 0;
+    for (double x in dBValueList) {
+      avg += x;
+    }
+    avg /= dBValueList.length;
+    setState(() {
+      this.avgDbValue = avg.toStringAsFixed(2);
+    });
   }
 
   void stop() {
@@ -69,6 +103,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
       if (this.mounted) {
         this.setState(() {
           this._isRecording = false;
+          dBValueList?.clear();
         });
       }
     } catch (err) {
@@ -91,6 +126,16 @@ class _ToolsScreenState extends State<ToolsScreen> {
       if (noiseReading.meanDecibel < double.parse(minDbValue)) {
         this.minDbValue = noiseReading.meanDecibel.toStringAsFixed(2);
       }
+    });
+  }
+
+  void resetNoise() {
+    setState(() {
+      maxDb = "30.00";
+      meanDb = "30.00";
+      maxDbValue = "30.00";
+      minDbValue = "150.00";
+      dBValueList?.clear();
     });
   }
 
@@ -167,53 +212,42 @@ class _ToolsScreenState extends State<ToolsScreen> {
                   ),
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(""),
-                    Text(
-                      "MIN",
-                      style: TextStyle(color: Colors.blue),
+                    IconButton(
+                      icon: Icon(Icons.info),
+                      onPressed: () {
+                        Fluttertoast.cancel();
+                        Fluttertoast.showToast(
+                            msg: AppLocalizations.of(context)
+                                .translate("noise_info_string"),
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.CENTER,
+                            fontSize: 20);
+                      },
+                      color: Colors.blue,
                     ),
-                    Text(
-                      "MAX",
-                      style: TextStyle(color: Colors.blue),
+                    TextButton(
+                      child: Text(
+                        "RESET",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      onPressed: this.resetNoise,
                     ),
                   ],
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    /*RaisedButton(
-                      padding: EdgeInsets.all(15),
-                      onPressed: _isRecording ? this.stop : this.start,
-                      color: _isRecording ? Colors.red : Colors.green,
-                      shape: CircleBorder(),
-                      child: _isRecording
-                          ? Icon(Icons.stop)
-                          : Icon(Icons.play_arrow),
-                    ),*/
-                    Text(
-                      this.meanDb,
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w600,
-                      ),
+                Container(
+                  child: Text(
+                    this.meanDb,
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w600,
                     ),
-                    Text(
-                      this.minDbValue,
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      this.maxDbValue,
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
+                  ),
+                ),
+                Divider(
+                  height: 8,
+                  color: Colors.transparent,
                 ),
                 Container(
                   height: 200,
@@ -221,9 +255,13 @@ class _ToolsScreenState extends State<ToolsScreen> {
                       enableLoadingAnimation: true,
                       axes: <RadialAxis>[
                         RadialAxis(
-                            minimum: 30,
+                            minimum: 0,
                             maximum: 120,
                             ranges: <GaugeRange>[
+                              GaugeRange(
+                                  startValue: 0,
+                                  endValue: 30,
+                                  color: Colors.black),
                               GaugeRange(
                                   startValue: 30,
                                   endValue: 60,
@@ -254,6 +292,49 @@ class _ToolsScreenState extends State<ToolsScreen> {
                                   positionFactor: 0.6)
                             ])
                       ]),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Text(
+                      "MIN",
+                      style: TextStyle(color: Colors.blue),
+                    ),
+                    Text(
+                      "AVG",
+                      style: TextStyle(color: Colors.blue),
+                    ),
+                    Text(
+                      "MAX",
+                      style: TextStyle(color: Colors.blue),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Text(
+                      this.minDbValue,
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      this.avgDbValue,
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      this.maxDbValue,
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
                 Divider(
                   color: Colors.transparent,

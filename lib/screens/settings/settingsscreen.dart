@@ -307,7 +307,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Widget dfSound6 = RaisedButton(
       onPressed: () {
         setState(() {
-          _currentAudioName1 = "audio/Snort-2.m4a";
+          _currentAudioName1 = "audio/Snort-2.mp3";
         });
         Navigator.of(context).pop();
       },
@@ -317,7 +317,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Widget dfSound7 = RaisedButton(
       onPressed: () {
         setState(() {
-          _currentAudioName1 = "audio/Snort-3.m4a";
+          _currentAudioName1 = "audio/Snort-3.mp3";
         });
         Navigator.of(context).pop();
       },
@@ -999,7 +999,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                  AppLocalizations.of(context).translate('sound_volume_string'),
+                  AppLocalizations.of(context)
+                          .translate('sound_volume_string') +
+                      ":",
                   style: TextStyle(fontWeight: FontWeight.bold)),
               Container(
                 padding: EdgeInsets.only(left: 7.0),
@@ -1043,7 +1045,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(AppLocalizations.of(context).translate('timeout_string'),
+              Text(
+                  AppLocalizations.of(context).translate('timeout_string') +
+                      ":",
                   style: TextStyle(fontWeight: FontWeight.bold)),
               Container(
                 padding: EdgeInsets.only(left: 7.0),
@@ -1105,7 +1109,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(AppLocalizations.of(context).translate('time_frame_string'),
+              Text(
+                  AppLocalizations.of(context).translate('time_frame_string') +
+                      ":",
                   style: TextStyle(fontWeight: FontWeight.bold)),
               Container(
                 padding: EdgeInsets.only(left: 7.0),
@@ -1263,7 +1269,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(AppLocalizations.of(context).translate('per_sec_string'),
+              Text(
+                  AppLocalizations.of(context).translate('per_sec_string') +
+                      ":",
                   style: TextStyle(fontWeight: FontWeight.bold)),
               Container(
                 padding: EdgeInsets.only(left: 7.0),
@@ -1325,7 +1333,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(AppLocalizations.of(context).translate('db_treshold_string'),
+              Text(
+                  AppLocalizations.of(context).translate('db_treshold_string') +
+                      ":",
                   style: TextStyle(fontWeight: FontWeight.bold)),
               Container(
                 padding: EdgeInsets.only(left: 8.0),

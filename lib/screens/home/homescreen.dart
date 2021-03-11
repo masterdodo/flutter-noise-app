@@ -76,8 +76,8 @@ class _HomeScreenState extends State<HomeScreen> {
     "audio/Foghorn.mp3": 5,
     "audio/Grocery-Scanning.mp3": 4,
     "audio/Snort-1.mp3": 4,
-    "audio/Snort-2.m4a": 2,
-    "audio/Snort-3.m4a": 7
+    "audio/Snort-2.mp3": 2,
+    "audio/Snort-3.mp3": 7
   };
 
   //ADS
@@ -435,7 +435,9 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                  AppLocalizations.of(context).translate('sound_volume_string'),
+                  AppLocalizations.of(context)
+                          .translate('sound_volume_string') +
+                      ":",
                   style: TextStyle(fontWeight: FontWeight.bold)),
               Container(
                 padding: EdgeInsets.only(left: 6.0),
@@ -532,9 +534,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (dBValueList?.length == arrLength) {
       dBValueList.removeAt(0);
     }
-    if (text != null || text != "") {
+    if (text != null && text != "") {
       dBValueList.add(double.parse(text));
-      print(text);
     }
     if (dBValueList?.length == arrLength) {
       double avg = 0;

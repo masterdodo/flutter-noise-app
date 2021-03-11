@@ -81,8 +81,8 @@ flutter:
     - assets/audio/Foghorn.mp3
     - assets/audio/Grocery-Scanning.mp3
     - assets/audio/Snort-1.mp3
-    - assets/audio/Snort-2.m4a
-    - assets/audio/Snort-3.m4a
+    - assets/audio/Snort-2.mp3
+    - assets/audio/Snort-3.mp3
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
