@@ -104,6 +104,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
         this.setState(() {
           this._isRecording = false;
           dBValueList?.clear();
+          timer?.cancel();
         });
       }
     } catch (err) {
