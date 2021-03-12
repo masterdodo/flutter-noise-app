@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:noise_app/components/my_drawer.dart';
@@ -1118,8 +1120,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 width: 30,
                 child: TextField(
                   controller: timeSampleController,
-                  decoration:
-                      InputDecoration(border: InputBorder.none, hintText: '0'),
+                  decoration: InputDecoration(
+                    isCollapsed: true,
+                    hintText: '0',
+                  ),
                   onChanged: (String text) {
                     if (double.parse(text) >= _timeSampleMinValue &&
                         double.parse(text) <= _timeSampleMaxValue) {
@@ -1278,8 +1282,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 width: 30,
                 child: TextField(
                   controller: perSecController,
-                  decoration:
-                      InputDecoration(border: InputBorder.none, hintText: '0'),
+                  decoration: InputDecoration(
+                    isCollapsed: true,
+                    hintText: '0',
+                  ),
                   onChanged: (String text) {
                     if (double.parse(text) >= _perSecMinValue &&
                         double.parse(text) <= _perSecMaxValue) {
@@ -1342,8 +1348,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 width: 35,
                 child: TextField(
                   controller: dbTresholdController,
-                  decoration:
-                      InputDecoration(border: InputBorder.none, hintText: '0'),
+                  decoration: InputDecoration(
+                    hintText: '0',
+                    isCollapsed: true,
+                  ),
                   onChanged: (String text) {
                     if (double.parse(text) >= _dbMinValue &&
                         double.parse(text) <= _dbMaxValue) {

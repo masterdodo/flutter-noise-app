@@ -19,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _isRecording; //mic button recording on or off
+  bool _isTimerRunning; //delay timer on or off
   StreamSubscription<NoiseReading>
       _noiseSubscription; //getting dB values from mic
   NoiseMeter _noiseMeter; //getting dB values from mic
@@ -55,8 +56,11 @@ class _HomeScreenState extends State<HomeScreen> {
       _activeAudioVolumeValue;
   int _timeLastAudioPlayed = 0;
   int _activeTimeoutValue;
+  String delayForTimer;
 
   String _bestAudioFile;
+  String delayAfterStart;
+  Timer delayTimer;
 
   int soundCounter;
 
@@ -101,6 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _noiseMeter = new NoiseMeter(onError);
     preferencesOnInit();
     _isRecording = false;
+    _isTimerRunning = false;
     arrLength = 0;
     audioManager = AudioManager.STREAM_MUSIC;
     initAudioStreamType();
@@ -108,6 +113,10 @@ class _HomeScreenState extends State<HomeScreen> {
     audioVolumeController.addListener(_setAudioVolumeValue);
     soundCounter = 0;
     _bestAudioFile = null;
+    setState(() {
+      this.delayAfterStart = delayAfterStart;
+      this.delayForTimer = delayAfterStart;
+    });
 
     //Notification init
     var androidInitilize = new AndroidInitializationSettings('app_icon');
@@ -160,6 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
         prefs.getString("audioname3Value") ?? 'audio/Censor-beep-3.mp3';
     _bestAudioFile =
         prefs.getString("audioname1Value") ?? 'audio/Grocery-Scanning.mp3';
+    delayAfterStart = prefs.getString("delayAfterStart") ?? '00:00';
 
     prefs.setInt("dbValue", _activeDbValue);
     prefs.setInt("persecValue", _activePerSecValue);
@@ -172,6 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
     prefs.setString("audioname1Value", _activeAudioFile1);
     prefs.setString("audioname2Value", _activeAudioFile2);
     prefs.setString("audioname3Value", _activeAudioFile3);
+    prefs.setString("delayAfterStart", delayAfterStart);
 
     audioVolumeController.text = _activeAudioVolumeValue.round().toString();
   }
@@ -231,6 +242,7 @@ class _HomeScreenState extends State<HomeScreen> {
     this.setState(() {
       if (!this._isRecording) {
         _isRecording = true;
+        _isTimerRunning = false;
       }
       _dBValueRealTime = noiseReading.meanDecibel.toString();
     });
@@ -239,6 +251,51 @@ class _HomeScreenState extends State<HomeScreen> {
   void onError(PlatformException e) {
     print(e.toString());
     _isRecording = false;
+    _isTimerRunning = false;
+  }
+
+  void preStart(context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isTimerRunning = true;
+      soundCounter = 0;
+    });
+    prefs.setString("delayAfterStart", delayAfterStart);
+    setState(() {
+      delayForTimer = delayAfterStart;
+    });
+    if (delayAfterStart == "00:00") {
+      start(context);
+    } else {
+      preStartCountdown(context);
+    }
+  }
+
+  void preStartCountdown(context) {
+    delayTimer = Timer.periodic(Duration(seconds: 1), (Timer t) {
+      if (int.parse(delayForTimer.split(":")[1]) == 0 &&
+          int.parse(delayForTimer.split(":")[0]) != 0) {
+        delayForTimer = (int.parse(delayForTimer.split(":")[0]) - 1)
+                .toString()
+                .padLeft(2, "0") +
+            ":59";
+      } else {
+        delayForTimer = (int.parse(delayForTimer.split(":")[0]))
+                .toString()
+                .padLeft(2, "0") +
+            ":" +
+            (int.parse(delayForTimer.split(":")[1]) - 1)
+                .toString()
+                .padLeft(2, "0");
+      }
+      setState(() {
+        this.delayForTimer = delayForTimer;
+      });
+      if (delayForTimer == "00:00") {
+        delayTimer?.cancel();
+        start(context);
+      }
+    });
   }
 
   //Turn MIC on
@@ -275,6 +332,7 @@ class _HomeScreenState extends State<HomeScreen> {
           } else if (_activeTimeoutUnit == 'hr') {
             _activeTimeoutValue *= 3600;
           }
+
           _activeAudioFile1 = prefs.getString("audioname1Value") ?? '';
           _activeAudioFile2 = prefs.getString("audioname2Value") ?? '';
           _activeAudioFile3 = prefs.getString("audioname3Value") ?? '';
@@ -283,6 +341,7 @@ class _HomeScreenState extends State<HomeScreen> {
           dBValueList = new List<double>();
           _showNotification();
         });
+        delayTimer?.cancel();
         getdBData(); //Calls function to start persec timer
       }
     } catch (err) {
@@ -298,11 +357,13 @@ class _HomeScreenState extends State<HomeScreen> {
         _noiseSubscription = null;
       }
       timer?.cancel(); //Stops timer that's adding dB values to array
+      delayTimer?.cancel();
       stopAudio(); //Stops audio alert if playing
       dBValueList?.clear(); //Clears/Resets array of realtime dB values
       _hideNotification(); //Clears mic on notification
       this.setState(() {
         this._isRecording = false;
+        this._isTimerRunning = false;
         this._timeLastAudioPlayed = 0;
       });
     } catch (err) {
@@ -365,12 +426,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 ));
       },
       child: Scaffold(
-        drawerEdgeDragWidth: (_noiseSubscription != null) ? 0 : 20.0,
+        drawerEdgeDragWidth: (!_isRecording && !_isTimerRunning) ? 20.0 : 0.0,
         backgroundColor: _bgColor,
         drawer: (_noiseSubscription != null) ? null : MyDrawer(),
         appBar: AppBar(
           title: Text(AppLocalizations.of(context).translate('main_string')),
-          automaticallyImplyLeading: (_noiseSubscription == null),
+          automaticallyImplyLeading: (!_isRecording && !_isTimerRunning),
         ),
         body: Column(
           children: [
@@ -378,7 +439,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.only(top: 30, bottom: 30),
               child: Text(
                 soundCounter.toString().padLeft(3, '0'),
-                style: TextStyle(fontSize: 40),
+                style: TextStyle(fontSize: 35),
               ),
             ),
             Center(
@@ -386,12 +447,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   RaisedButton(
-                    padding: EdgeInsets.all(45),
-                    color: _isRecording ? Colors.red : Colors.green,
+                    padding: EdgeInsets.all(35),
+                    color: _isRecording
+                        ? Colors.red
+                        : (_isTimerRunning ? Colors.yellow : Colors.green),
                     shape: CircleBorder(),
-                    onPressed:
-                        _isRecording ? this.stop : () => this.start(context),
-                    child: _isRecording
+                    onPressed: (_isRecording || _isTimerRunning)
+                        ? this.stop
+                        : () => this.preStart(context),
+                    child: (_isRecording || _isTimerRunning)
                         ? Icon(
                             Icons.stop,
                             color: Colors.white,
@@ -415,7 +479,55 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Colors.transparent,
                   ),
                   AbsorbPointer(
-                      absorbing: _isRecording, child: soundVolume(context))
+                    absorbing: _isRecording || _isTimerRunning,
+                    child: (_isRecording || _isTimerRunning)
+                        ? Text(
+                            (this.delayForTimer == "00:00")
+                                ? ""
+                                : "- " + this.delayForTimer,
+                            style: TextStyle(fontSize: 20),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Text(
+                                "Delay after start:",
+                                style: TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                              DropdownButton<String>(
+                                value: delayAfterStart,
+                                icon: Icon(Icons.arrow_downward),
+                                iconSize: 24,
+                                elevation: 16,
+                                style: TextStyle(color: Colors.black),
+                                underline: Container(
+                                  height: 2,
+                                  color: Colors.blueAccent,
+                                ),
+                                onChanged: (String newValue) {
+                                  setState(() {
+                                    delayAfterStart = newValue;
+                                  });
+                                },
+                                items: <String>[
+                                  '00:00',
+                                  '15:00',
+                                  '30:00',
+                                  '45:00',
+                                  '60:00'
+                                ].map<DropdownMenuItem<String>>((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                              )
+                            ],
+                          ),
+                  ),
+                  AbsorbPointer(
+                      absorbing: _isRecording || _isTimerRunning,
+                      child: soundVolume(context))
                 ],
               ),
             ),
@@ -490,9 +602,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         Flexible(
           child: Slider(
-              activeColor: (_isRecording) ? Colors.grey[300] : Colors.blue,
-              inactiveColor:
-                  (_isRecording) ? Colors.grey[300] : Colors.blue[100],
+              activeColor: (_isRecording || _isTimerRunning)
+                  ? Colors.grey[300]
+                  : Colors.blue,
+              inactiveColor: (_isRecording || _isTimerRunning)
+                  ? Colors.grey[300]
+                  : Colors.blue[100],
               min: minVal,
               max: maxVal,
               divisions: (maxVal - minVal).round(),
