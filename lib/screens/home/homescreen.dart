@@ -491,7 +491,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               Text(
-                                "Delay after start:",
+                                AppLocalizations.of(context)
+                                    .translate("delay_timer_string"),
                                 style: TextStyle(fontWeight: FontWeight.w600),
                               ),
                               DropdownButton<String>(

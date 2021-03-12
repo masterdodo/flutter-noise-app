@@ -56,5 +56,6 @@
     "one_sound_string": "At least one sound has to be enabled.",
     "hourly_string": "Hourly statistics",
     "footage_string": "Audio footage and graphs",
-    "noise_info_string": "dB info:\n\n20 – Whisper\n40  - Quiet classroom\n60 – Normal conversation\n80 – Noisy city\n100 – Engine sound\n120 – Point of pain"
+    "noise_info_string": "dB info:\n\n20 – Whisper\n40  - Quiet classroom\n60 – Normal conversation\n80 – Noisy city\n100 – Engine sound\n120 – Point of pain",
+    "delay_timer_string": "Delay after start:"
 }
