@@ -525,6 +525,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                   ),
+                  Divider(
+                    color: Colors.transparent,
+                  ),
                   AbsorbPointer(
                       absorbing: _isRecording || _isTimerRunning,
                       child: soundVolume(context))
@@ -553,12 +556,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(fontWeight: FontWeight.bold)),
               Container(
                 padding: EdgeInsets.only(left: 6.0),
-                width: 30,
+                width: 32,
                 child: TextField(
+                  textAlign: TextAlign.end,
                   controller: audioVolumeController,
                   decoration: InputDecoration(
-                    contentPadding: EdgeInsets.zero,
-                    border: InputBorder.none,
+                    isCollapsed: true,
                     hintText: '0',
                   ),
                   onChanged: (String text) {

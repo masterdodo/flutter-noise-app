@@ -1007,11 +1007,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   style: TextStyle(fontWeight: FontWeight.bold)),
               Container(
                 padding: EdgeInsets.only(left: 7.0),
-                width: 30,
+                width: 32,
                 child: TextField(
+                  textAlign: TextAlign.end,
                   controller: audioVolumeController,
-                  decoration:
-                      InputDecoration(border: InputBorder.none, hintText: '0'),
+                  decoration: InputDecoration(
+                    isCollapsed: true,
+                    hintText: '0',
+                  ),
                   onChanged: (String text) {
                     if (double.parse(text) >= _audioVolumeMinValue &&
                         double.parse(text) <= _audioVolumeMaxValue) {
@@ -1052,12 +1055,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ":",
                   style: TextStyle(fontWeight: FontWeight.bold)),
               Container(
-                padding: EdgeInsets.only(left: 7.0),
+                padding: EdgeInsets.only(left: 7.0, right: 5.0),
                 width: 30,
                 child: TextField(
+                  textAlign: TextAlign.end,
                   controller: timeoutController,
-                  decoration:
-                      InputDecoration(border: InputBorder.none, hintText: '0'),
+                  decoration: InputDecoration(
+                    isCollapsed: true,
+                    hintText: '0',
+                  ),
                   onChanged: (String text) {
                     if (double.parse(text) >= _timeoutMinValue &&
                         double.parse(text) <= _timeoutMaxValue) {
@@ -1116,9 +1122,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ":",
                   style: TextStyle(fontWeight: FontWeight.bold)),
               Container(
-                padding: EdgeInsets.only(left: 7.0),
+                padding: EdgeInsets.only(left: 7.0, right: 5.0),
                 width: 30,
                 child: TextField(
+                  textAlign: TextAlign.end,
                   controller: timeSampleController,
                   decoration: InputDecoration(
                     isCollapsed: true,
@@ -1278,9 +1285,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ":",
                   style: TextStyle(fontWeight: FontWeight.bold)),
               Container(
-                padding: EdgeInsets.only(left: 7.0),
+                padding: EdgeInsets.only(left: 7.0, right: 5.0),
                 width: 30,
                 child: TextField(
+                  textAlign: TextAlign.end,
                   controller: perSecController,
                   decoration: InputDecoration(
                     isCollapsed: true,
@@ -1347,6 +1355,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 padding: EdgeInsets.only(left: 8.0),
                 width: 35,
                 child: TextField(
+                  textAlign: TextAlign.end,
                   controller: dbTresholdController,
                   decoration: InputDecoration(
                     hintText: '0',
