@@ -50,7 +50,7 @@
     "yes_string": "Yes",
     "no_string": "No",
     "exit_app_string": "Do you really want to exit the app?",
-    "standby_string": "Standby",
+    "schedule_string": "Schedule",
     "pro_string": "This feature is going to be available in pro version.",
     "algorithm_string": "Switching",
     "one_sound_string": "At least one sound has to be enabled.",

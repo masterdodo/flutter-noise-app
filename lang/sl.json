@@ -50,7 +50,7 @@
     "yes_string": "Da",
     "no_string": "Ne",
     "exit_app_string": "Ali res želite zapreti aplikacijo?",
-    "standby_string": "Standby",
+    "schedule_string": "Urnik",
     "pro_string": "Ta funkcija bo na voljo v pro različici.",
     "algorithm_string": "Menjevanje",
     "one_sound_string": "Vsaj en zvok mora biti vklopljen.",

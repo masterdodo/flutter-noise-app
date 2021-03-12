@@ -43,11 +43,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _audioActive2 = false;
   bool _audioActive3 = false;
   bool _algorithmValue = false;
-  bool _standbyValue = false;
+  bool _scheduleValue = false;
   bool _hourlyValue = false;
   bool _footageValue = false;
 
-  bool _proVersion = false;
+  bool _proVersion = true;
 
   String _persecUnit = "sec";
   String _timesampleUnit = "sec";
@@ -112,7 +112,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _timesampleUnit = prefs.getString("timesampleUnit") ?? 'sec';
       _timeoutUnit = prefs.getString("timeoutUnit") ?? 'sec';
       _algorithmValue = prefs.getBool("algorithmValue") ?? false;
-      _standbyValue = prefs.getBool("standbyValue") ?? false;
+      _scheduleValue = prefs.getBool("scheduleValue") ?? false;
       _hourlyValue = prefs.getBool("hourlyValue") ?? false;
       _footageValue = prefs.getBool("footageValue") ?? false;
     });
@@ -180,9 +180,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  _setStandbyValue() {
+  _setscheduleValue() {
     setState(() {
-      _standbyValue = !_standbyValue;
+      _scheduleValue = !_scheduleValue;
       _settingsChanged = true;
     });
   }
@@ -328,8 +328,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
 
     AlertDialog defaultSoundsDialog = AlertDialog(
-      content: SizedBox(
-        height: 200,
+      content: Flexible(
+        fit: FlexFit.tight,
         child: ListView(
           children: [
             dfSound1,
@@ -647,7 +647,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       prefs.setString("audioname3Value", _currentAudioName3);
       prefs.setBool("audioActive3", _audioActive3);
       prefs.setBool("algorithmValue", _algorithmValue);
-      prefs.setBool("standbyValue", _standbyValue);
+      prefs.setBool("scheduleValue", _scheduleValue);
       prefs.setBool("hourlyValue", _hourlyValue);
       prefs.setBool("footageValue", _footageValue);
       _settingsChanged = false;
@@ -680,7 +680,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       prefs.setString("audioname2Value", _currentAudioName2);
       prefs.setString("audioname3Value", _currentAudioName3);
       prefs.setBool("algorithmValue", _algorithmValue);
-      prefs.setBool("standbyValue", _standbyValue);
+      prefs.setBool("scheduleValue", _scheduleValue);
       prefs.setBool("hourlyValue", _hourlyValue);
       prefs.setBool("footageValue", _footageValue);
       _settingsChanged = false;
@@ -701,7 +701,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _currentAudioName3 = "audio/Censor-beep-3.mp3";
       _currentAudioVolumeValue = 83;
       _algorithmValue = false;
-      _standbyValue = false;
+      _scheduleValue = false;
       _hourlyValue = false;
       _footageValue = false;
       _settingsChanged = true;
@@ -711,41 +711,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async {
-        if (_settingsChanged) {
-          return showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: Text(AppLocalizations.of(context)
-                      .translate("save_dialog_back_key_string")),
-                  actions: [
-                    FlatButton(
-                      child: Text(
-                          AppLocalizations.of(context).translate("no_string")),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        Navigator.pushReplacementNamed(context, "/");
-                        return false;
-                      },
-                    ),
-                    FlatButton(
-                      child: Text(
-                          AppLocalizations.of(context).translate("yes_string")),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        saveSettingsValuesOnBackKey(context);
-                        Navigator.pushReplacementNamed(context, "/");
-                        return false;
-                      },
-                    )
-                  ],
-                );
-              });
-        }
-        Navigator.pushReplacementNamed(context, "/");
-        return false;
-      },
+      onWillPop: () => onPop(context),
       child: Scaffold(
         backgroundColor: _bgColor,
         drawer: MyDrawer(),
@@ -776,7 +742,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 visible: _advancedSettings,
                 child: Column(
                   children: [
-                    setupStandby(context),
+                    setupschedule(context),
                     setupHourlyStats(context),
                     setupFootageAudioGraphs(context),
                   ],
@@ -795,7 +761,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  GestureDetector setupStandby(BuildContext context) {
+  Future<bool> onPop(context) async {
+    if (_settingsChanged) {
+      return showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(AppLocalizations.of(context)
+                  .translate("save_dialog_back_key_string")),
+              actions: [
+                FlatButton(
+                  child:
+                      Text(AppLocalizations.of(context).translate("no_string")),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pushReplacementNamed(context, "/");
+                    return false;
+                  },
+                ),
+                FlatButton(
+                  child: Text(
+                      AppLocalizations.of(context).translate("yes_string")),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    saveSettingsValuesOnBackKey(context);
+                    Navigator.pushReplacementNamed(context, "/");
+                    return false;
+                  },
+                )
+              ],
+            );
+          });
+    }
+    Navigator.pushReplacementNamed(context, "/");
+    return false;
+  }
+
+  GestureDetector setupschedule(BuildContext context) {
     return GestureDetector(
         onTap: (_proVersion)
             ? (() {})
@@ -805,7 +807,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     msg: AppLocalizations.of(context).translate("pro_string"),
                     toastLength: Toast.LENGTH_SHORT);
               }),
-        child: AbsorbPointer(absorbing: !_proVersion, child: standby(context)));
+        child:
+            AbsorbPointer(absorbing: !_proVersion, child: schedule(context)));
   }
 
   GestureDetector setupAlgorithm(BuildContext context) {
@@ -1174,7 +1177,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Container standby(BuildContext context) {
+  Container schedule(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(bottom: 20),
       padding: EdgeInsets.all(5),
@@ -1183,15 +1186,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            AppLocalizations.of(context).translate("standby_string"),
+            AppLocalizations.of(context).translate("schedule_string"),
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           SizedBox(
             width: 20,
           ),
           Switch(
-            value: _standbyValue,
-            onChanged: (_proVersion) ? (val) => _setStandbyValue() : null,
+            value: _scheduleValue,
+            onChanged: (_proVersion) ? (val) => _setscheduleValue() : null,
           ),
         ],
       ),
