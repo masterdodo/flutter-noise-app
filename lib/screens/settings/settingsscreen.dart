@@ -69,16 +69,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     loadingVarsAsync();
   }
 
-  void loadingVarsAsync() async {
-    await getSharedPrefs();
-    dbTresholdController.addListener(_setDbTresholdValue);
-    perSecController.addListener(_setPerSecValue);
-    timeSampleController.addListener(_setTimeSampleValue);
-    timeoutController.addListener(_setTimeoutValue);
-    audioVolumeController.addListener(_setAudioVolumeValue);
-    _settingsChanged = false;
-  }
-
   @override
   void dispose() {
     super.dispose();
@@ -87,6 +77,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
     timeSampleController.dispose();
     timeoutController.dispose();
     audioVolumeController.dispose();
+  }
+
+  void loadingVarsAsync() async {
+    await getSharedPrefs();
+    dbTresholdController.addListener(_setDbTresholdValue);
+    perSecController.addListener(_setPerSecValue);
+    timeSampleController.addListener(_setTimeSampleValue);
+    timeoutController.addListener(_setTimeoutValue);
+    audioVolumeController.addListener(_setAudioVolumeValue);
+    _settingsChanged = false;
   }
 
   Future<Null> getSharedPrefs() async {
@@ -213,21 +213,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  showAlertDialog1(BuildContext context) {
+  showAlertDialog1(BuildContext context) async {
     // set up the buttons
     Widget assetsButton = FlatButton(
       child:
           Text(AppLocalizations.of(context).translate('default_sounds_string')),
-      onPressed: () {
+      onPressed: () async {
         Navigator.of(context).pop();
-        showDefaultSoundDialog1(context);
+        String _audioPath = await showDefaultSoundDialog(context);
+        setState(() {
+          _currentAudioName1 = _audioPath;
+          _settingsChanged = true;
+        });
       },
     );
     Widget localButton = FlatButton(
       child: Text(AppLocalizations.of(context).translate('choose_string')),
-      onPressed: () {
+      onPressed: () async {
         Navigator.of(context).pop();
-        openAudioPicker1();
+        String _audioPath = await openAudioPicker();
+        setState(() {
+          _currentAudioName1 = _audioPath;
+          _settingsChanged = true;
+        });
       },
     );
     Widget cancelButton = FlatButton(
@@ -255,81 +263,147 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  showDefaultSoundDialog1(BuildContext context) {
-    Widget dfSound1 = RaisedButton(
-      onPressed: () {
+  showAlertDialog2(BuildContext context) {
+    // set up the buttons
+    Widget assetsButton = FlatButton(
+      child:
+          Text(AppLocalizations.of(context).translate('default_sounds_string')),
+      onPressed: () async {
+        Navigator.of(context).pop();
+        String _audioPath = await showDefaultSoundDialog(context);
         setState(() {
-          _currentAudioName1 = "audio/Bleep.mp3";
+          _currentAudioName2 = _audioPath;
+          _settingsChanged = true;
         });
+      },
+    );
+    Widget localButton = FlatButton(
+      child: Text(AppLocalizations.of(context).translate('choose_string')),
+      onPressed: () async {
+        Navigator.of(context).pop();
+        String _audioPath = await openAudioPicker();
+        setState(() {
+          _currentAudioName2 = _audioPath;
+          _settingsChanged = true;
+        });
+      },
+    );
+    Widget cancelButton = FlatButton(
+      child: Text(AppLocalizations.of(context).translate('cancel_string')),
+      onPressed: () {
         Navigator.of(context).pop();
       },
+    ); // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title:
+          Text(AppLocalizations.of(context).translate('select_sound_string')),
+      content: Text(
+          AppLocalizations.of(context).translate('select_sound_desc_string')),
+      actions: [
+        assetsButton,
+        localButton,
+        cancelButton,
+      ],
+    ); // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  showAlertDialog3(BuildContext context) {
+    // set up the buttons
+    Widget assetsButton = FlatButton(
+      child:
+          Text(AppLocalizations.of(context).translate('default_sounds_string')),
+      onPressed: () async {
+        Navigator.of(context).pop();
+        String _audioPath = await showDefaultSoundDialog(context);
+        setState(() {
+          _currentAudioName3 = _audioPath;
+          _settingsChanged = true;
+        });
+      },
+    );
+    Widget localButton = FlatButton(
+      child: Text(AppLocalizations.of(context).translate('choose_string')),
+      onPressed: () async {
+        Navigator.of(context).pop();
+        String _audioPath = await openAudioPicker();
+        setState(() {
+          _currentAudioName3 = _audioPath;
+          _settingsChanged = true;
+        });
+      },
+    );
+    Widget cancelButton = FlatButton(
+      child: Text(AppLocalizations.of(context).translate('cancel_string')),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    ); // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title:
+          Text(AppLocalizations.of(context).translate('select_sound_string')),
+      content: Text(
+          AppLocalizations.of(context).translate('select_sound_desc_string')),
+      actions: [
+        assetsButton,
+        localButton,
+        cancelButton,
+      ],
+    ); // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  //Shows the default sounds to choose from assets folder
+  showDefaultSoundDialog(BuildContext context) {
+    Widget dfSound1 = RaisedButton(
+      onPressed: () => Navigator.pop(context, "audio/Bleep.mp3"),
       child: Text("Bleep"),
       color: Colors.blue[100],
     );
     Widget dfSound2 = RaisedButton(
-      onPressed: () {
-        setState(() {
-          _currentAudioName1 = "audio/Censor-beep-3.mp3";
-        });
-        Navigator.of(context).pop();
-      },
+      onPressed: () => Navigator.pop(context, "audio/Censor-beep-3.mp3"),
       child: Text("Censor Beep 3"),
       color: Colors.blue[100],
     );
     Widget dfSound3 = RaisedButton(
-      onPressed: () {
-        setState(() {
-          _currentAudioName1 = "audio/Foghorn.mp3";
-        });
-        Navigator.of(context).pop();
-      },
+      onPressed: () => Navigator.pop(context, "audio/Foghorn.mp3"),
       child: Text("Foghorn"),
       color: Colors.blue[100],
     );
     Widget dfSound4 = RaisedButton(
-      onPressed: () {
-        setState(() {
-          _currentAudioName1 = "audio/Grocery-Scanning.mp3";
-        });
-        Navigator.of(context).pop();
-      },
+      onPressed: () => Navigator.pop(context, "audio/Grocery-Scanning.mp3"),
       child: Text("Grocery Scanning"),
       color: Colors.blue[100],
     );
     Widget dfSound5 = RaisedButton(
-      onPressed: () {
-        setState(() {
-          _currentAudioName1 = "audio/Snort-1.mp3";
-        });
-        Navigator.of(context).pop();
-      },
+      onPressed: () => Navigator.pop(context, "audio/Snort-1.mp3"),
       child: Text("Snort 1"),
       color: Colors.blue[100],
     );
     Widget dfSound6 = RaisedButton(
-      onPressed: () {
-        setState(() {
-          _currentAudioName1 = "audio/Snort-2.mp3";
-        });
-        Navigator.of(context).pop();
-      },
+      onPressed: () => Navigator.pop(context, "audio/Snort-2.mp3"),
       child: Text("Snort 2"),
       color: Colors.blue[100],
     );
     Widget dfSound7 = RaisedButton(
-      onPressed: () {
-        setState(() {
-          _currentAudioName1 = "audio/Snort-3.mp3";
-        });
-        Navigator.of(context).pop();
-      },
+      onPressed: () => Navigator.pop(context, "audio/Snort-3.mp3"),
       child: Text("Snort 3"),
       color: Colors.blue[100],
     );
 
     AlertDialog defaultSoundsDialog = AlertDialog(
-      content: Flexible(
-        fit: FlexFit.tight,
+      content: SizedBox(
+        height: 200,
         child: ListView(
           children: [
             dfSound1,
@@ -344,7 +418,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
 
-    showDialog(
+    return showDialog(
         context: context,
         builder: (BuildContext context) {
           return defaultSoundsDialog;
@@ -352,272 +426,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   //Used to choose audio file, then sets the path of file and gets just the name of the file
-  void openAudioPicker1() async {
+  Future<String> openAudioPicker() async {
     FilePickerResult result =
         await FilePicker.platform.pickFiles(type: FileType.audio);
     String path;
     if (result == null) {
-      path = _currentAudioName1;
+      path = null;
     } else {
       path = result.files.single.path;
     }
-    setState(() {
-      _currentAudioName1 = path;
-      _settingsChanged = true;
-    });
-  }
-
-  void removeAudio1() {
-    setState(() {
-      _currentAudioName1 = audioString;
-      _settingsChanged = true;
-    });
-  }
-
-  showAlertDialog2(BuildContext context) {
-    // set up the buttons
-    Widget assetsButton = FlatButton(
-      child:
-          Text(AppLocalizations.of(context).translate('default_sounds_string')),
-      onPressed: () {
-        Navigator.of(context).pop();
-        showDefaultSoundDialog2(context);
-      },
-    );
-    Widget localButton = FlatButton(
-      child: Text(AppLocalizations.of(context).translate('choose_string')),
-      onPressed: () {
-        Navigator.of(context).pop();
-        openAudioPicker2();
-      },
-    );
-    Widget cancelButton = FlatButton(
-      child: Text(AppLocalizations.of(context).translate('cancel_string')),
-      onPressed: () {
-        Navigator.of(context).pop();
-      },
-    ); // set up the AlertDialog
-    AlertDialog alert = AlertDialog(
-      title:
-          Text(AppLocalizations.of(context).translate('select_sound_string')),
-      content: Text(
-          AppLocalizations.of(context).translate('select_sound_desc_string')),
-      actions: [
-        assetsButton,
-        localButton,
-        cancelButton,
-      ],
-    ); // show the dialog
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
-  }
-
-  showDefaultSoundDialog2(BuildContext context) {
-    Widget dfSound1 = RaisedButton(
-      onPressed: () {
-        setState(() {
-          _currentAudioName2 = "audio/Bleep.mp3";
-        });
-        Navigator.of(context).pop();
-      },
-      child: Text("Bleep"),
-      color: Colors.blue[100],
-    );
-    Widget dfSound2 = RaisedButton(
-      onPressed: () {
-        setState(() {
-          _currentAudioName2 = "audio/Censor-beep-3.mp3";
-        });
-        Navigator.of(context).pop();
-      },
-      child: Text("Censor Beep 3"),
-      color: Colors.blue[100],
-    );
-    Widget dfSound3 = RaisedButton(
-      onPressed: () {
-        setState(() {
-          _currentAudioName2 = "audio/Foghorn.mp3";
-        });
-        Navigator.of(context).pop();
-      },
-      child: Text("Foghorn"),
-      color: Colors.blue[100],
-    );
-    Widget dfSound4 = RaisedButton(
-      onPressed: () {
-        setState(() {
-          _currentAudioName2 = "audio/Grocery-Scanning.mp3";
-        });
-        Navigator.of(context).pop();
-      },
-      child: Text("Grocery Scanning"),
-      color: Colors.blue[100],
-    );
-
-    AlertDialog defaultSoundsDialog = AlertDialog(
-      content: SizedBox(
-        height: 200,
-        child: ListView(
-          children: [dfSound1, dfSound2, dfSound3, dfSound4],
-        ),
-      ),
-    );
-
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return defaultSoundsDialog;
-        });
-  }
-
-  //Used to choose audio file, then sets the path of file and gets just the name of the file
-  void openAudioPicker2() async {
-    FilePickerResult result =
-        await FilePicker.platform.pickFiles(type: FileType.audio);
-    String path;
-    if (result == null) {
-      path = _currentAudioName2;
-    } else {
-      path = result.files.single.path;
-    }
-    setState(() {
-      _currentAudioName2 = path;
-      _settingsChanged = true;
-    });
-  }
-
-  void removeAudio2() {
-    setState(() {
-      _currentAudioName2 = audioString;
-      _settingsChanged = true;
-    });
-  }
-
-  showAlertDialog3(BuildContext context) {
-    // set up the buttons
-    Widget assetsButton = FlatButton(
-      child:
-          Text(AppLocalizations.of(context).translate('default_sounds_string')),
-      onPressed: () {
-        Navigator.of(context).pop();
-        showDefaultSoundDialog3(context);
-      },
-    );
-    Widget localButton = FlatButton(
-      child: Text(AppLocalizations.of(context).translate('choose_string')),
-      onPressed: () {
-        Navigator.of(context).pop();
-        openAudioPicker3();
-      },
-    );
-    Widget cancelButton = FlatButton(
-      child: Text(AppLocalizations.of(context).translate('cancel_string')),
-      onPressed: () {
-        Navigator.of(context).pop();
-      },
-    ); // set up the AlertDialog
-    AlertDialog alert = AlertDialog(
-      title:
-          Text(AppLocalizations.of(context).translate('select_sound_string')),
-      content: Text(
-          AppLocalizations.of(context).translate('select_sound_desc_string')),
-      actions: [
-        assetsButton,
-        localButton,
-        cancelButton,
-      ],
-    ); // show the dialog
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
-  }
-
-  showDefaultSoundDialog3(BuildContext context) {
-    Widget dfSound1 = RaisedButton(
-      onPressed: () {
-        setState(() {
-          _currentAudioName3 = "audio/Bleep.mp3";
-        });
-        Navigator.of(context).pop();
-      },
-      child: Text("Bleep"),
-      color: Colors.blue[100],
-    );
-    Widget dfSound2 = RaisedButton(
-      onPressed: () {
-        setState(() {
-          _currentAudioName3 = "audio/Censor-beep-3.mp3";
-        });
-        Navigator.of(context).pop();
-      },
-      child: Text("Censor Beep 3"),
-      color: Colors.blue[100],
-    );
-    Widget dfSound3 = RaisedButton(
-      onPressed: () {
-        setState(() {
-          _currentAudioName3 = "audio/Foghorn.mp3";
-        });
-        Navigator.of(context).pop();
-      },
-      child: Text("Foghorn"),
-      color: Colors.blue[100],
-    );
-    Widget dfSound4 = RaisedButton(
-      onPressed: () {
-        setState(() {
-          _currentAudioName3 = "audio/Grocery-Scanning.mp3";
-        });
-        Navigator.of(context).pop();
-      },
-      child: Text("Grocery Scanning"),
-      color: Colors.blue[100],
-    );
-
-    AlertDialog defaultSoundsDialog = AlertDialog(
-      content: SizedBox(
-        height: 200,
-        child: ListView(
-          children: [dfSound1, dfSound2, dfSound3, dfSound4],
-        ),
-      ),
-    );
-
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return defaultSoundsDialog;
-        });
-  }
-
-  //Used to choose audio file, then sets the path of file and gets just the name of the file
-  void openAudioPicker3() async {
-    FilePickerResult result =
-        await FilePicker.platform.pickFiles(type: FileType.audio);
-    String path;
-    if (result == null) {
-      path = _currentAudioName3;
-    } else {
-      path = result.files.single.path;
-    }
-    setState(() {
-      _currentAudioName3 = path;
-      _settingsChanged = true;
-    });
-  }
-
-  void removeAudio3() {
-    setState(() {
-      _currentAudioName3 = audioString;
-      _settingsChanged = true;
-    });
+    return path;
   }
 
   void saveSettingsValues(context) async {
