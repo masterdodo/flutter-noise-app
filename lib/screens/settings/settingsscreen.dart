@@ -1,5 +1,6 @@
 import 'dart:ui';
-
+import 'package:audioplayers/audioplayers.dart';
+import 'package:audioplayers/audio_cache.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:noise_app/components/my_drawer.dart';
@@ -42,12 +43,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _audioActive1 = true;
   bool _audioActive2 = false;
   bool _audioActive3 = false;
+  bool _audio1Playing = false;
+  bool _audio2Playing = false;
+  bool _audio3Playing = false;
   bool _algorithmValue = false;
   bool _scheduleValue = false;
   bool _hourlyValue = false;
   bool _footageValue = false;
 
-  bool _proVersion = true;
+  bool _proVersion = false;
 
   String _persecUnit = "sec";
   String _timesampleUnit = "sec";
@@ -62,6 +66,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _currentAudioName1; //current audio name 1
   String _currentAudioName2; //current audio name 2
   String _currentAudioName3; //current audio name 3
+
+  final assetPlayer = AudioCache();
+  AudioPlayer audioPlayer = AudioPlayer();
+
+  Map<String, int> _defaultSounds = {
+    "audio/Bleep.mp3": 2,
+    "audio/Censor-beep-3.mp3": 1,
+    "audio/Foghorn.mp3": 5,
+    "audio/Grocery-Scanning.mp3": 4,
+    "audio/Snort-1.mp3": 4,
+    "audio/Snort-2.mp3": 2,
+    "audio/Snort-3.mp3": 7
+  };
 
   @override
   void initState() {
@@ -221,10 +238,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onPressed: () async {
         Navigator.of(context).pop();
         String _audioPath = await showDefaultSoundDialog(context);
-        setState(() {
-          _currentAudioName1 = _audioPath;
-          _settingsChanged = true;
-        });
+        if (_audioPath != null) {
+          setState(() {
+            _currentAudioName1 = _audioPath;
+            _settingsChanged = true;
+          });
+        }
       },
     );
     Widget localButton = FlatButton(
@@ -232,10 +251,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onPressed: () async {
         Navigator.of(context).pop();
         String _audioPath = await openAudioPicker();
-        setState(() {
-          _currentAudioName1 = _audioPath;
-          _settingsChanged = true;
-        });
+        if (_audioPath != null) {
+          setState(() {
+            _currentAudioName1 = _audioPath;
+            _settingsChanged = true;
+          });
+        }
       },
     );
     Widget cancelButton = FlatButton(
@@ -271,10 +292,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onPressed: () async {
         Navigator.of(context).pop();
         String _audioPath = await showDefaultSoundDialog(context);
-        setState(() {
-          _currentAudioName2 = _audioPath;
-          _settingsChanged = true;
-        });
+        if (_audioPath != null) {
+          setState(() {
+            _currentAudioName2 = _audioPath;
+            _settingsChanged = true;
+          });
+        }
       },
     );
     Widget localButton = FlatButton(
@@ -282,10 +305,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onPressed: () async {
         Navigator.of(context).pop();
         String _audioPath = await openAudioPicker();
-        setState(() {
-          _currentAudioName2 = _audioPath;
-          _settingsChanged = true;
-        });
+        if (_audioPath != null) {
+          setState(() {
+            _currentAudioName2 = _audioPath;
+            _settingsChanged = true;
+          });
+        }
       },
     );
     Widget cancelButton = FlatButton(
@@ -321,10 +346,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onPressed: () async {
         Navigator.of(context).pop();
         String _audioPath = await showDefaultSoundDialog(context);
-        setState(() {
-          _currentAudioName3 = _audioPath;
-          _settingsChanged = true;
-        });
+        if (_audioPath != null) {
+          setState(() {
+            _currentAudioName3 = _audioPath;
+            _settingsChanged = true;
+          });
+        }
       },
     );
     Widget localButton = FlatButton(
@@ -332,10 +359,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onPressed: () async {
         Navigator.of(context).pop();
         String _audioPath = await openAudioPicker();
-        setState(() {
-          _currentAudioName3 = _audioPath;
-          _settingsChanged = true;
-        });
+        if (_audioPath != null) {
+          setState(() {
+            _currentAudioName3 = _audioPath;
+            _settingsChanged = true;
+          });
+        }
       },
     );
     Widget cancelButton = FlatButton(
@@ -1225,12 +1254,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ]);
   }
 
+  Timer assetPlayingTimer;
+//Play audio file
+  void playAudio(String audioFile) async {
+    assetPlayingTimer?.cancel();
+    await audioPlayer?.stop();
+    await audioPlayer?.release();
+    if (_defaultSounds.containsKey(audioFile)) {
+      audioPlayer = await assetPlayer.play(audioFile);
+      assetPlayingTimer =
+          Timer(Duration(seconds: _defaultSounds[audioFile]), () {
+        setState(() {
+          _audio1Playing = false;
+          _audio2Playing = false;
+          _audio3Playing = false;
+        });
+      });
+    } else {
+      await audioPlayer.play(audioFile, isLocal: true);
+    }
+  }
+
+  //Stops audio file
+  void stopAudio() async {
+    assetPlayingTimer?.cancel();
+    await audioPlayer?.stop();
+    await audioPlayer?.release();
+  }
+
   // Widget for audio chooser 1
   Row audioChooseControl1() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Flexible(
+          fit: FlexFit.tight,
           child: AbsorbPointer(
             absorbing: !_audioActive1,
             child: Opacity(
@@ -1247,6 +1305,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ),
+        (_audioActive1)
+            ? IconButton(
+                icon: Icon((!_audio1Playing) ? Icons.play_arrow : Icons.stop),
+                color: Colors.blue,
+                onPressed: () {
+                  (_audio1Playing)
+                      ? stopAudio()
+                      : playAudio(_currentAudioName1);
+                  setState(() {
+                    _audio1Playing = !_audio1Playing;
+                    _audio2Playing = false;
+                    _audio3Playing = false;
+                  });
+                  audioPlayer.onPlayerCompletion.listen((event) {
+                    print("HAHA");
+                    setState(() {
+                      _audio1Playing = false;
+                    });
+                  });
+                },
+              )
+            : Text(""),
         Checkbox(
           value: _audioActive1,
           onChanged: _setActiveAudio1,
@@ -1270,6 +1350,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Flexible(
+          fit: FlexFit.tight,
           child: AbsorbPointer(
             absorbing: !_audioActive2,
             child: Opacity(
@@ -1286,6 +1367,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ),
+        (_audioActive2)
+            ? IconButton(
+                icon: Icon((!_audio2Playing) ? Icons.play_arrow : Icons.stop),
+                color: Colors.blue,
+                onPressed: () {
+                  (_audio2Playing)
+                      ? stopAudio()
+                      : playAudio(_currentAudioName2);
+                  setState(() {
+                    _audio2Playing = !_audio2Playing;
+                    _audio1Playing = false;
+                    _audio3Playing = false;
+                  });
+                  audioPlayer.onPlayerCompletion.listen((event) {
+                    setState(() {
+                      _audio2Playing = false;
+                    });
+                  });
+                },
+              )
+            : Text(""),
         Checkbox(
           value: _audioActive2,
           onChanged: _setActiveAudio2,
@@ -1309,6 +1411,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Flexible(
+          fit: FlexFit.tight,
           child: AbsorbPointer(
             absorbing: !_audioActive3,
             child: Opacity(
@@ -1324,6 +1427,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ),
+        (_audioActive3)
+            ? IconButton(
+                icon: Icon((!_audio3Playing) ? Icons.play_arrow : Icons.stop),
+                color: Colors.blue,
+                onPressed: () {
+                  (_audio3Playing)
+                      ? stopAudio()
+                      : playAudio(_currentAudioName3);
+                  setState(() {
+                    _audio3Playing = !_audio3Playing;
+                    _audio1Playing = false;
+                    _audio2Playing = false;
+                  });
+                  audioPlayer.onPlayerCompletion.listen((event) {
+                    setState(() {
+                      _audio3Playing = false;
+                    });
+                  });
+                },
+              )
+            : Text(""),
         Checkbox(
           value: _audioActive3,
           onChanged: _setActiveAudio3,

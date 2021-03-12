@@ -57,5 +57,5 @@
     "hourly_string": "Statistika po urah",
     "footage_string": "Zvočni posnetki in grafi",
     "noise_info_string": "dB info:\n\n20 – tiho šepetanje\n40  - tišina v učilnici\n60 – normalen pogovor\n80 – hrup v mestu\n100 – hrup motorja\n120 – prag bolečine",
-    "delay_timer_string": "Zakasnitev po vklopu:"
+    "delay_timer_string": "Zakasnitev po vklopu (min):"
 }
