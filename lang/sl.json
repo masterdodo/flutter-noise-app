@@ -44,7 +44,7 @@
     "snackbar_save_fail_string": "Nastavitve niso shranjene!",
     "save_1_string": "Shrani",
     "save_dialog_desc_string": "Ste prepričani, da želite shraniti te nastavitve?",
-    "save_dialog_back_key_string": "ALi želite shraniti spremenjene nastavitve?",
+    "save_dialog_back_key_string": "Ali želite shraniti spremenjene nastavitve?",
     "share_menu_string": "Deli",
     "email_menu_string": "Pošlji nam E-pošto",
     "yes_string": "Da",
@@ -57,5 +57,5 @@
     "hourly_string": "Statistika po urah",
     "footage_string": "Zvočni posnetki in grafi",
     "noise_info_string": "dB info:\n\n20 – tiho šepetanje\n40  - tišina v učilnici\n60 – normalen pogovor\n80 – hrup v mestu\n100 – hrup motorja\n120 – prag bolečine",
-    "delay_timer_string": "Zakasnitev po vklopu (min):"
+    "delay_timer_string": "Zakasnitev po vklopu:"
 }

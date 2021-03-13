@@ -412,12 +412,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   title: Text(AppLocalizations.of(context)
                       .translate("exit_app_string")),
                   actions: [
-                    FlatButton(
+                    TextButton(
                       child: Text(
                           AppLocalizations.of(context).translate("no_string")),
                       onPressed: () => Navigator.pop(context, false),
                     ),
-                    FlatButton(
+                    TextButton(
                       child: Text(
                           AppLocalizations.of(context).translate("yes_string")),
                       onPressed: () => Navigator.pop(context, true),
@@ -446,12 +446,16 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  RaisedButton(
-                    padding: EdgeInsets.all(35),
-                    color: _isRecording
-                        ? Colors.red
-                        : (_isTimerRunning ? Colors.yellow : Colors.green),
-                    shape: CircleBorder(),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: CircleBorder(),
+                      primary: _isRecording
+                          ? Colors.red
+                          : (_isTimerRunning
+                              ? Colors.deepPurple[800]
+                              : Colors.green),
+                      padding: EdgeInsets.all(35),
+                    ),
                     onPressed: (_isRecording || _isTimerRunning)
                         ? this.stop
                         : () => this.preStart(context),
@@ -488,17 +492,30 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: TextStyle(fontSize: 20),
                           )
                         : Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                AppLocalizations.of(context)
-                                    .translate("delay_timer_string"),
-                                style: TextStyle(fontWeight: FontWeight.w600),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 7.0),
+                                child: Text(
+                                  AppLocalizations.of(context)
+                                      .translate("delay_timer_string"),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16),
+                                ),
                               ),
                               DropdownButton<String>(
-                                value: delayAfterStart,
+                                value: (delayAfterStart == '00:00'
+                                    ? '0 min'
+                                    : (delayAfterStart == '15:00')
+                                        ? '15 min'
+                                        : (delayAfterStart == '30:00')
+                                            ? '30 min'
+                                            : (delayAfterStart == '45:00')
+                                                ? '45 min'
+                                                : '60 min'),
                                 icon: Icon(Icons.arrow_downward),
-                                iconSize: 24,
+                                iconSize: 20,
                                 elevation: 16,
                                 style: TextStyle(color: Colors.black),
                                 underline: Container(
@@ -507,19 +524,32 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 onChanged: (String newValue) {
                                   setState(() {
-                                    delayAfterStart = newValue;
+                                    delayAfterStart = (newValue == '0 min'
+                                        ? '00:00'
+                                        : (newValue == '15 min')
+                                            ? '15:00'
+                                            : (newValue == '30 min')
+                                                ? '30:00'
+                                                : (newValue == '45 min')
+                                                    ? '45:00'
+                                                    : '60:00');
                                   });
                                 },
                                 items: <String>[
-                                  '00:00',
-                                  '15:00',
-                                  '30:00',
-                                  '45:00',
-                                  '60:00'
+                                  '0 min',
+                                  '15 min',
+                                  '30 min',
+                                  '45 min',
+                                  '60 min'
                                 ].map<DropdownMenuItem<String>>((String value) {
                                   return DropdownMenuItem<String>(
                                     value: value,
-                                    child: Text(value),
+                                    child: Text(
+                                      value,
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                      ),
+                                    ),
                                   );
                                 }).toList(),
                               )
@@ -551,10 +581,13 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                  AppLocalizations.of(context)
-                          .translate('sound_volume_string') +
-                      ":",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+                AppLocalizations.of(context).translate('sound_volume_string') +
+                    ":",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
               Container(
                 padding: EdgeInsets.only(left: 6.0),
                 width: 32,

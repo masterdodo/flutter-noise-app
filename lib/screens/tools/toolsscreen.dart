@@ -204,36 +204,39 @@ class _ToolsScreenState extends State<ToolsScreen> {
             padding: EdgeInsets.all(10.0),
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 15, top: 20),
-                  child: Text(
-                    AppLocalizations.of(context)
-                        .translate('noise_meter_string'),
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      icon: Icon(Icons.info),
-                      onPressed: () {
-                        Fluttertoast.cancel();
-                        Fluttertoast.showToast(
-                            msg: AppLocalizations.of(context)
-                                .translate("noise_info_string"),
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.CENTER,
-                            fontSize: 20);
-                      },
-                      color: Colors.blue,
-                    ),
-                    TextButton(
-                      child: Text(
-                        "RESET",
-                        style: TextStyle(color: Colors.black),
+                    SizedBox(
+                      width: 75,
+                      child: IconButton(
+                        icon: Icon(Icons.info),
+                        onPressed: () {
+                          Fluttertoast.cancel();
+                          Fluttertoast.showToast(
+                              msg: AppLocalizations.of(context)
+                                  .translate("noise_info_string"),
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.CENTER,
+                              fontSize: 20);
+                        },
+                        color: Colors.blue,
                       ),
-                      onPressed: this.resetNoise,
+                    ),
+                    Text(
+                      AppLocalizations.of(context)
+                          .translate('noise_meter_string'),
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      width: 75,
+                      child: TextButton(
+                        child: Text(
+                          "RESET",
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        onPressed: this.resetNoise,
+                      ),
                     ),
                   ],
                 ),
@@ -351,20 +354,26 @@ class _ToolsScreenState extends State<ToolsScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    RaisedButton(
-                      padding: EdgeInsets.all(15),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        primary: _isRunning ? Colors.red : Colors.green,
+                        onPrimary: Colors.black,
+                        padding: EdgeInsets.all(15),
+                        shape: CircleBorder(),
+                      ),
                       onPressed: _isRunning ? this.stopSw : this.startSw,
-                      color: _isRunning ? Colors.red : Colors.green,
-                      shape: CircleBorder(),
                       child: _isRunning
                           ? Icon(Icons.stop)
                           : Icon(Icons.play_arrow),
                     ),
-                    RaisedButton(
-                      padding: EdgeInsets.all(15),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.blue,
+                        onPrimary: Colors.black,
+                        padding: EdgeInsets.all(15),
+                        shape: CircleBorder(),
+                      ),
                       onPressed: this.resetSw,
-                      color: Colors.blue,
-                      shape: CircleBorder(),
                       child: Icon(Icons.clear),
                     ),
                     Text(

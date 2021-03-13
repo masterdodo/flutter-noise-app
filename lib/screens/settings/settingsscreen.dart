@@ -232,7 +232,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   showAlertDialog1(BuildContext context) async {
     // set up the buttons
-    Widget assetsButton = FlatButton(
+    Widget assetsButton = TextButton(
       child:
           Text(AppLocalizations.of(context).translate('default_sounds_string')),
       onPressed: () async {
@@ -246,7 +246,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       },
     );
-    Widget localButton = FlatButton(
+    Widget localButton = TextButton(
       child: Text(AppLocalizations.of(context).translate('choose_string')),
       onPressed: () async {
         Navigator.of(context).pop();
@@ -259,7 +259,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       },
     );
-    Widget cancelButton = FlatButton(
+    Widget cancelButton = TextButton(
       child: Text(AppLocalizations.of(context).translate('cancel_string')),
       onPressed: () {
         Navigator.of(context).pop();
@@ -286,7 +286,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   showAlertDialog2(BuildContext context) {
     // set up the buttons
-    Widget assetsButton = FlatButton(
+    Widget assetsButton = TextButton(
       child:
           Text(AppLocalizations.of(context).translate('default_sounds_string')),
       onPressed: () async {
@@ -300,7 +300,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       },
     );
-    Widget localButton = FlatButton(
+    Widget localButton = TextButton(
       child: Text(AppLocalizations.of(context).translate('choose_string')),
       onPressed: () async {
         Navigator.of(context).pop();
@@ -313,7 +313,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       },
     );
-    Widget cancelButton = FlatButton(
+    Widget cancelButton = TextButton(
       child: Text(AppLocalizations.of(context).translate('cancel_string')),
       onPressed: () {
         Navigator.of(context).pop();
@@ -340,7 +340,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   showAlertDialog3(BuildContext context) {
     // set up the buttons
-    Widget assetsButton = FlatButton(
+    Widget assetsButton = TextButton(
       child:
           Text(AppLocalizations.of(context).translate('default_sounds_string')),
       onPressed: () async {
@@ -354,7 +354,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       },
     );
-    Widget localButton = FlatButton(
+    Widget localButton = TextButton(
       child: Text(AppLocalizations.of(context).translate('choose_string')),
       onPressed: () async {
         Navigator.of(context).pop();
@@ -367,7 +367,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       },
     );
-    Widget cancelButton = FlatButton(
+    Widget cancelButton = TextButton(
       child: Text(AppLocalizations.of(context).translate('cancel_string')),
       onPressed: () {
         Navigator.of(context).pop();
@@ -394,40 +394,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   //Shows the default sounds to choose from assets folder
   showDefaultSoundDialog(BuildContext context) {
-    Widget dfSound1 = RaisedButton(
+    Widget dfSound1 = ElevatedButton(
       onPressed: () => Navigator.pop(context, "audio/Bleep.mp3"),
       child: Text("Bleep"),
-      color: Colors.blue[100],
+      style: ElevatedButton.styleFrom(
+        primary: Colors.blue[100],
+        onPrimary: Colors.black,
+      ),
     );
-    Widget dfSound2 = RaisedButton(
+    Widget dfSound2 = ElevatedButton(
       onPressed: () => Navigator.pop(context, "audio/Censor-beep-3.mp3"),
       child: Text("Censor Beep 3"),
-      color: Colors.blue[100],
+      style: ElevatedButton.styleFrom(
+        primary: Colors.blue[100],
+        onPrimary: Colors.black,
+      ),
     );
-    Widget dfSound3 = RaisedButton(
+    Widget dfSound3 = ElevatedButton(
       onPressed: () => Navigator.pop(context, "audio/Foghorn.mp3"),
       child: Text("Foghorn"),
-      color: Colors.blue[100],
+      style: ElevatedButton.styleFrom(
+        primary: Colors.blue[100],
+        onPrimary: Colors.black,
+      ),
     );
-    Widget dfSound4 = RaisedButton(
+    Widget dfSound4 = ElevatedButton(
       onPressed: () => Navigator.pop(context, "audio/Grocery-Scanning.mp3"),
       child: Text("Grocery Scanning"),
-      color: Colors.blue[100],
+      style: ElevatedButton.styleFrom(
+        primary: Colors.blue[100],
+        onPrimary: Colors.black,
+      ),
     );
-    Widget dfSound5 = RaisedButton(
+    Widget dfSound5 = ElevatedButton(
       onPressed: () => Navigator.pop(context, "audio/Snort-1.mp3"),
       child: Text("Snort 1"),
-      color: Colors.blue[100],
+      style: ElevatedButton.styleFrom(
+        primary: Colors.blue[100],
+        onPrimary: Colors.black,
+      ),
     );
-    Widget dfSound6 = RaisedButton(
+    Widget dfSound6 = ElevatedButton(
       onPressed: () => Navigator.pop(context, "audio/Snort-2.mp3"),
       child: Text("Snort 2"),
-      color: Colors.blue[100],
+      style: ElevatedButton.styleFrom(
+        primary: Colors.blue[100],
+        onPrimary: Colors.black,
+      ),
     );
-    Widget dfSound7 = RaisedButton(
+    Widget dfSound7 = ElevatedButton(
       onPressed: () => Navigator.pop(context, "audio/Snort-3.mp3"),
       child: Text("Snort 3"),
-      color: Colors.blue[100],
+      style: ElevatedButton.styleFrom(
+        primary: Colors.blue[100],
+        onPrimary: Colors.black,
+      ),
     );
 
     AlertDialog defaultSoundsDialog = AlertDialog(
@@ -537,16 +558,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void resetSettingsValues() async {
     setState(() {
       _currentDbValue = 66;
+      dbTresholdController.text = "66";
       _currentPerSecValue = 5;
+      perSecController.text = "5";
       _persecUnit = "sec";
       _currentTimeSampleValue = 1;
+      timeSampleController.text = "1";
       _timesampleUnit = "sec";
       _currentTimeoutValue = 6;
+      timeoutController.text = "6";
       _timeoutUnit = "sec";
       _currentAudioName1 = "audio/Grocery-Scanning.mp3";
       _currentAudioName2 = "audio/Foghorn.mp3";
       _currentAudioName3 = "audio/Censor-beep-3.mp3";
       _currentAudioVolumeValue = 83;
+      audioVolumeController.text = "83";
       _algorithmValue = false;
       _scheduleValue = false;
       _hourlyValue = false;
@@ -617,7 +643,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: Text(AppLocalizations.of(context)
                   .translate("save_dialog_back_key_string")),
               actions: [
-                FlatButton(
+                TextButton(
                   child:
                       Text(AppLocalizations.of(context).translate("no_string")),
                   onPressed: () {
@@ -626,7 +652,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     return false;
                   },
                 ),
-                FlatButton(
+                TextButton(
                   child: Text(
                       AppLocalizations.of(context).translate("yes_string")),
                   onPressed: () {
@@ -702,18 +728,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Container advancedSettings(BuildContext context) {
     return Container(
-      child: ButtonTheme(
-        minWidth: 165,
-        child: RaisedButton(
+      child: ElevatedButtonTheme(
+        data: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            minimumSize: MaterialStateProperty.all(
+              Size(165, 37),
+            ),
+          ),
+        ),
+        child: ElevatedButton(
           onPressed: () {
             setState(() {
               _advancedSettings = !_advancedSettings;
             });
           },
-          color: Colors.blue[50],
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          style: ElevatedButton.styleFrom(
+            primary: Colors.blue[50],
+            onPrimary: Colors.black,
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+          ),
           child: _advancedSettings
               ? Text(
                   AppLocalizations.of(context)
@@ -732,14 +768,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   showAlertDialogOnSave(BuildContext context) {
     // set up the buttons
-    Widget saveButton = FlatButton(
+    Widget saveButton = TextButton(
       child: Text(AppLocalizations.of(context).translate('save_1_string')),
       onPressed: () {
         Navigator.of(context).pop(true);
         saveSettingsValues(context);
       },
     );
-    Widget cancelButton = FlatButton(
+    Widget cancelButton = TextButton(
       child: Text(AppLocalizations.of(context).translate('cancel_string')),
       onPressed: () {
         Navigator.of(context).pop(false);
@@ -764,29 +800,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Builder saveSettingsBuilder() {
     return Builder(builder: (BuildContext context) {
-      return RaisedButton(
-          color: Colors.blue[50],
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-          onPressed: () => showAlertDialogOnSave(context),
-          child: Text(
-            AppLocalizations.of(context).translate('save_string'),
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ));
+      return ElevatedButtonTheme(
+        data: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            minimumSize: MaterialStateProperty.all(
+              Size(165, 37),
+            ),
+          ),
+        ),
+        child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              primary: Colors.blue[50],
+              onPrimary: Colors.black,
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+            onPressed: () => showAlertDialogOnSave(context),
+            child: Text(
+              AppLocalizations.of(context).translate('save_string'),
+              style: TextStyle(fontWeight: FontWeight.bold),
+            )),
+      );
     });
   }
 
   Container defaultSettings(BuildContext context) {
     return Container(
-      child: ButtonTheme(
-        minWidth: 165,
-        child: RaisedButton(
+      child: ElevatedButtonTheme(
+        data: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            minimumSize: MaterialStateProperty.all(
+              Size(165, 37),
+            ),
+          ),
+        ),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            primary: Colors.blue[50],
+            onPrimary: Colors.black,
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+          ),
           onPressed: () => resetSettingsValues(),
-          color: Colors.blue[50],
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           child: Text(
             AppLocalizations.of(context).translate('default_settings_string'),
             style: TextStyle(fontWeight: FontWeight.bold),
