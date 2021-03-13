@@ -210,7 +210,11 @@ class _ToolsScreenState extends State<ToolsScreen> {
                     SizedBox(
                       width: 75,
                       child: IconButton(
-                        icon: Icon(Icons.info),
+                        color: Colors.blue,
+                        icon: Icon(
+                          Icons.info,
+                          size: 26,
+                        ),
                         onPressed: () {
                           Fluttertoast.cancel();
                           Fluttertoast.showToast(
@@ -220,20 +224,25 @@ class _ToolsScreenState extends State<ToolsScreen> {
                               gravity: ToastGravity.CENTER,
                               fontSize: 20);
                         },
-                        color: Colors.blue,
                       ),
                     ),
                     Text(
                       AppLocalizations.of(context)
                           .translate('noise_meter_string'),
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
                     ),
                     SizedBox(
                       width: 75,
-                      child: TextButton(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.blue,
+                        ),
                         child: Text(
                           "RESET",
-                          style: TextStyle(color: Colors.black),
+                          style: TextStyle(fontSize: 14),
                         ),
                         onPressed: this.resetNoise,
                       ),
@@ -349,7 +358,10 @@ class _ToolsScreenState extends State<ToolsScreen> {
                     child: Text(
                       AppLocalizations.of(context)
                           .translate('stopwatch_string'),
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
                     )),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
