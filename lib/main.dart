@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:noise_app/app_localizations.dart';
 import 'package:noise_app/routes.dart';
 import 'package:noise_app/theme/style.dart';
+import 'package:android_alarm_manager/android_alarm_manager.dart';
 
-void main() {
+void main() async {
   runApp(NoiseApp());
+  await AndroidAlarmManager.initialize();
 }
 
 class NoiseApp extends StatelessWidget {

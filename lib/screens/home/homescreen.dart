@@ -9,6 +9,7 @@ import 'package:volume/volume.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:share/share.dart';
+import 'package:android_alarm_manager/android_alarm_manager.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 
@@ -17,7 +18,7 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _isRecording; //mic button recording on or off
   bool _isTimerRunning; //delay timer on or off
   StreamSubscription<NoiseReading>
@@ -62,6 +63,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String delayAfterStart;
   Timer delayTimer;
 
+  int dateOnTurnOff;
+
   int soundCounter;
 
   int maxVol, currentVol;
@@ -84,6 +87,8 @@ class _HomeScreenState extends State<HomeScreen> {
     "audio/Snort-3.mp3": 7
   };
 
+  int recordingAlarmId = 1;
+
   //ADS
   BannerAd _bannerAd;
   static const MobileAdTargetingInfo targetInfo = MobileAdTargetingInfo();
@@ -101,6 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     audioPlayer = AudioPlayer();
     _noiseMeter = new NoiseMeter(onError);
     preferencesOnInit();
@@ -135,8 +141,43 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     audioVolumeController.dispose();
     _bannerAd.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        if (dateOnTurnOff != null && _isTimerRunning) {
+          int x =
+              (((new DateTime.now()).millisecondsSinceEpoch) / 1000).round() -
+                  dateOnTurnOff;
+          int min = (x / 60).floor();
+          int sec = (x % 60);
+          delayForTimer = (int.parse(delayForTimer.split(":")[0]) - min)
+                  .toString()
+                  .padLeft(2, '0') +
+              ":" +
+              ((int.parse(delayForTimer.split(":")[1]) - sec < 0)
+                      ? ''
+                      : (int.parse(delayForTimer.split(":")[1]) - sec))
+                  .toString()
+                  .padLeft(2, '0');
+          preStartCountdown(context);
+        }
+        break;
+      case AppLifecycleState.paused:
+        dateOnTurnOff =
+            (((new DateTime.now()).millisecondsSinceEpoch) / 1000).round();
+        if (_isTimerRunning) {
+          stopTheTimer();
+        }
+        break;
+      default:
+        break;
+    }
   }
 
   _setAudioVolumeValue() {
@@ -265,8 +306,16 @@ class _HomeScreenState extends State<HomeScreen> {
       delayForTimer = delayAfterStart;
     });
     if (delayAfterStart == "00:00") {
-      start(context);
+      start();
     } else {
+      int x = int.parse(delayAfterStart.split(":")[0]);
+      print(x);
+      AndroidAlarmManager.cancel(recordingAlarmId);
+      AndroidAlarmManager.oneShot(
+        Duration(seconds: x),
+        recordingAlarmId,
+        fireAlarm,
+      );
       preStartCountdown(context);
     }
   }
@@ -293,57 +342,57 @@ class _HomeScreenState extends State<HomeScreen> {
       });
       if (delayForTimer == "00:00") {
         delayTimer?.cancel();
-        start(context);
+        start();
       }
     });
   }
 
+  void stopTheTimer() {
+    delayTimer?.cancel();
+  }
+
   //Turn MIC on
-  void start(context) async {
+  void start() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      if (prefs.getString("audioname1Value") == null ||
-          prefs.getString("audioname1Value") == audioString) {
-        Scaffold.of(context).showSnackBar(snackBarNoAudio);
-      } else {
-        _noiseSubscription = _noiseMeter.noiseStream.listen(onData);
-        setState(() {
-          //Sets active values from sliders and calculates the length of an array
-          soundCounter = 0;
-          _activeDbValue = prefs.getInt("dbValue") ?? 30;
-          _activePerSecValue = prefs.getInt("persecValue") ?? 1;
-          _activePerSecUnit = prefs.getString("persecUnit") ?? 'sec';
-          if (_activePerSecUnit == 'min') {
-            _activePerSecValue *= 60;
-          } else if (_activePerSecUnit == 'hr') {
-            _activePerSecValue *= 3600;
-          }
-          _activeTimeSampleValue = prefs.getInt("timesampleValue") ?? 1;
-          _activeTimeSampleUnit = prefs.getString("timesampleUnit") ?? 'sec';
-          if (_activeTimeSampleUnit == 'min') {
-            _activeTimeSampleValue *= 60;
-          } else if (_activeTimeSampleUnit == 'hr') {
-            _activeTimeSampleValue *= 3600;
-          }
-          _activeTimeoutValue = prefs.getInt("timeoutValue") ?? 1;
-          _activeTimeoutUnit = prefs.getString("timeoutUnit") ?? 'sec';
-          if (_activeTimeoutUnit == 'min') {
-            _activeTimeoutValue *= 60;
-          } else if (_activeTimeoutUnit == 'hr') {
-            _activeTimeoutValue *= 3600;
-          }
+      _noiseSubscription = _noiseMeter.noiseStream.listen(onData);
+      setState(() {
+        //Sets active values from sliders and calculates the length of an array
+        soundCounter = 0;
+        _activeDbValue = prefs.getInt("dbValue") ?? 30;
+        _activePerSecValue = prefs.getInt("persecValue") ?? 1;
+        _activePerSecUnit = prefs.getString("persecUnit") ?? 'sec';
+        if (_activePerSecUnit == 'min') {
+          _activePerSecValue *= 60;
+        } else if (_activePerSecUnit == 'hr') {
+          _activePerSecValue *= 3600;
+        }
+        _activeTimeSampleValue = prefs.getInt("timesampleValue") ?? 1;
+        _activeTimeSampleUnit = prefs.getString("timesampleUnit") ?? 'sec';
+        if (_activeTimeSampleUnit == 'min') {
+          _activeTimeSampleValue *= 60;
+        } else if (_activeTimeSampleUnit == 'hr') {
+          _activeTimeSampleValue *= 3600;
+        }
+        _activeTimeoutValue = prefs.getInt("timeoutValue") ?? 1;
+        _activeTimeoutUnit = prefs.getString("timeoutUnit") ?? 'sec';
+        if (_activeTimeoutUnit == 'min') {
+          _activeTimeoutValue *= 60;
+        } else if (_activeTimeoutUnit == 'hr') {
+          _activeTimeoutValue *= 3600;
+        }
 
-          _activeAudioFile1 = prefs.getString("audioname1Value") ?? '';
-          _activeAudioFile2 = prefs.getString("audioname2Value") ?? '';
-          _activeAudioFile3 = prefs.getString("audioname3Value") ?? '';
-          setVol(_activeAudioVolumeValue);
-          arrLength = (_activePerSecValue * _activeTimeSampleValue).floor();
-          dBValueList = new List<double>();
-          _showNotification();
-        });
-        delayTimer?.cancel();
-        getdBData(); //Calls function to start persec timer
-      }
+        _activeAudioFile1 = prefs.getString("audioname1Value") ?? '';
+        _activeAudioFile2 = prefs.getString("audioname2Value") ?? '';
+        _activeAudioFile3 = prefs.getString("audioname3Value") ?? '';
+        setVol(_activeAudioVolumeValue);
+        arrLength = (_activePerSecValue * _activeTimeSampleValue).floor();
+        dBValueList = new List<double>();
+        _showNotification();
+      });
+      delayTimer?.cancel();
+      getdBData(); //Calls function to start persec timer
+
     } catch (err) {
       print(err);
     }
@@ -504,54 +553,57 @@ class _HomeScreenState extends State<HomeScreen> {
                                       fontSize: 16),
                                 ),
                               ),
-                              DropdownButton<String>(
-                                value: (delayAfterStart == '00:00'
-                                    ? '0 min'
-                                    : (delayAfterStart == '15:00')
-                                        ? '15 min'
-                                        : (delayAfterStart == '30:00')
-                                            ? '30 min'
-                                            : (delayAfterStart == '45:00')
-                                                ? '45 min'
-                                                : '60 min'),
-                                icon: Icon(Icons.arrow_downward),
-                                iconSize: 20,
-                                elevation: 16,
-                                style: TextStyle(color: Colors.black),
-                                underline: Container(
-                                  height: 2,
-                                  color: Colors.blueAccent,
-                                ),
-                                onChanged: (String newValue) {
-                                  setState(() {
-                                    delayAfterStart = (newValue == '0 min'
-                                        ? '00:00'
-                                        : (newValue == '15 min')
-                                            ? '15:00'
-                                            : (newValue == '30 min')
-                                                ? '30:00'
-                                                : (newValue == '45 min')
-                                                    ? '45:00'
-                                                    : '60:00');
-                                  });
-                                },
-                                items: <String>[
-                                  '0 min',
-                                  '15 min',
-                                  '30 min',
-                                  '45 min',
-                                  '60 min'
-                                ].map<DropdownMenuItem<String>>((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(
-                                      value,
-                                      style: TextStyle(
-                                        fontSize: 15,
+                              DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: (delayAfterStart == '00:00'
+                                      ? '0 min'
+                                      : (delayAfterStart == '15:00')
+                                          ? '15 min'
+                                          : (delayAfterStart == '30:00')
+                                              ? '30 min'
+                                              : (delayAfterStart == '45:00')
+                                                  ? '45 min'
+                                                  : '60 min'),
+                                  icon: Icon(Icons.arrow_drop_down),
+                                  iconSize: 20,
+                                  elevation: 16,
+                                  style: TextStyle(color: Colors.black),
+                                  underline: Container(
+                                    height: 2,
+                                    color: Colors.blueAccent,
+                                  ),
+                                  onChanged: (String newValue) {
+                                    setState(() {
+                                      delayAfterStart = (newValue == '0 min'
+                                          ? '00:00'
+                                          : (newValue == '15 min')
+                                              ? '15:00'
+                                              : (newValue == '30 min')
+                                                  ? '30:00'
+                                                  : (newValue == '45 min')
+                                                      ? '45:00'
+                                                      : '60:00');
+                                    });
+                                  },
+                                  items: <String>[
+                                    '0 min',
+                                    '15 min',
+                                    '30 min',
+                                    '45 min',
+                                    '60 min'
+                                  ].map<DropdownMenuItem<String>>(
+                                      (String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(
+                                        value,
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                }).toList(),
+                                    );
+                                  }).toList(),
+                                ),
                               )
                             ],
                           ),
@@ -626,16 +678,20 @@ class _HomeScreenState extends State<HomeScreen> {
   Row audioVolumeSliderControl(double minVal, double maxVal) {
     return Row(
       children: [
-        GestureDetector(
-          onTap: () {
-            if (_activeAudioVolumeValue > minVal) {
-              setState(() {
-                _activeAudioVolumeValue--;
-                audioVolumeController.text = _activeAudioVolumeValue.toString();
-              });
-            }
-          },
-          child: Icon(Icons.remove),
+        SizedBox(
+          width: 20,
+          child: GestureDetector(
+            onTap: () {
+              if (_activeAudioVolumeValue > minVal) {
+                setState(() {
+                  _activeAudioVolumeValue--;
+                  audioVolumeController.text =
+                      _activeAudioVolumeValue.toString();
+                });
+              }
+            },
+            child: Icon(Icons.remove),
+          ),
         ),
         Flexible(
           child: Slider(
@@ -657,16 +713,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 });
               }),
         ),
-        GestureDetector(
-          onTap: () {
-            if (_activeAudioVolumeValue < maxVal) {
-              setState(() {
-                _activeAudioVolumeValue++;
-                audioVolumeController.text = _activeAudioVolumeValue.toString();
-              });
-            }
-          },
-          child: Icon(Icons.add),
+        SizedBox(
+          width: 20,
+          child: GestureDetector(
+            onTap: () {
+              if (_activeAudioVolumeValue < maxVal) {
+                setState(() {
+                  _activeAudioVolumeValue++;
+                  audioVolumeController.text =
+                      _activeAudioVolumeValue.toString();
+                });
+              }
+            },
+            child: Icon(Icons.add),
+          ),
         ),
       ],
     );
@@ -705,4 +765,8 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
   }
+}
+
+void fireAlarm() {
+  print('Alarm fired at ${DateTime.now()}');
 }

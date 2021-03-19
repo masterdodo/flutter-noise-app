@@ -208,7 +208,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     SizedBox(
-                      width: 75,
+                      width: 80,
                       child: IconButton(
                         color: Colors.blue,
                         icon: Icon(
@@ -235,7 +235,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
                       ),
                     ),
                     SizedBox(
-                      width: 75,
+                      width: 80,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           primary: Colors.blue,

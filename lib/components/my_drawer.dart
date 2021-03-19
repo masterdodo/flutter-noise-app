@@ -66,6 +66,16 @@ class MyDrawer extends StatelessWidget {
             },
           ),
           ListTile(
+            title: Text(
+              AppLocalizations.of(context).translate("archive_string"),
+              style: TextStyle(color: Colors.grey[400]),
+            ),
+            leading: Icon(
+              Icons.archive,
+              color: Colors.grey[400],
+            ),
+          ),
+          ListTile(
             selected: (ModalRoute.of(context).settings.name == '/settings'),
             title: Text(
                 AppLocalizations.of(context).translate('menu_settings_string')),

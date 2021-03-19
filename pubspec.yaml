@@ -51,6 +51,8 @@ dependencies:
 
   syncfusion_flutter_charts: ^18.4.44+1
 
+  android_alarm_manager: ^0.4.5+20
+
   system_shortcuts: ^1.0.0
 
   cupertino_icons: ^1.0.0

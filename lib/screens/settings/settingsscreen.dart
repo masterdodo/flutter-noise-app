@@ -452,9 +452,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
 
     AlertDialog defaultSoundsDialog = AlertDialog(
-      content: SizedBox(
-        height: 200,
-        child: ListView(
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             dfSound1,
             dfSound2,
@@ -597,6 +597,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(children: [
+              soundVolume(context),
               dBTreshold(context),
               Visibility(
                 child: Column(
@@ -608,14 +609,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 visible: _advancedSettings,
               ),
-              soundVolume(context),
-              setupAlgorithm(context),
+              Visibility(visible: _proVersion, child: setupschedule(context)),
               audio(context),
               Visibility(
-                visible: _advancedSettings,
+                visible: _advancedSettings && _proVersion,
                 child: Column(
                   children: [
-                    setupschedule(context),
                     setupHourlyStats(context),
                     setupFootageAudioGraphs(context),
                   ],
@@ -862,6 +861,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: sliderBoxDecoration(),
       child: Column(
         children: [
+          Visibility(visible: _proVersion, child: setupAlgorithm(context)),
           Text(
             AppLocalizations.of(context).translate('audio_string'),
             style: TextStyle(fontWeight: FontWeight.bold),
@@ -965,7 +965,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   style: TextStyle(fontWeight: FontWeight.bold)),
               Container(
                 padding: EdgeInsets.only(left: 7.0, right: 5.0),
-                width: 30,
+                width: 35,
                 child: TextField(
                   textAlign: TextAlign.end,
                   controller: timeoutController,
@@ -984,29 +984,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               Container(
-                  width: 46,
-                  child: DropdownButton<String>(
-                    value: _timeoutUnit,
-                    icon: Icon(Icons.arrow_downward),
-                    iconSize: 24,
-                    elevation: 16,
-                    style: TextStyle(color: Colors.black),
-                    underline: Container(
-                      height: 2,
-                      color: Colors.blueAccent,
+                  width: 50,
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _timeoutUnit,
+                      icon: Icon(Icons.arrow_drop_down),
+                      iconSize: 24,
+                      elevation: 16,
+                      style: TextStyle(color: Colors.black),
+                      underline: Container(
+                        height: 2,
+                        color: Colors.blueAccent,
+                      ),
+                      onChanged: (String newValue) {
+                        setState(() {
+                          _timeoutUnit = newValue;
+                        });
+                      },
+                      items: <String>['sec', 'min', 'hr']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
                     ),
-                    onChanged: (String newValue) {
-                      setState(() {
-                        _timeoutUnit = newValue;
-                      });
-                    },
-                    items: <String>['sec', 'min', 'hr']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
                   )),
             ],
           ),
@@ -1032,7 +1034,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   style: TextStyle(fontWeight: FontWeight.bold)),
               Container(
                 padding: EdgeInsets.only(left: 7.0, right: 5.0),
-                width: 30,
+                width: 35,
                 child: TextField(
                   textAlign: TextAlign.end,
                   controller: timeSampleController,
@@ -1051,29 +1053,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               Container(
-                  width: 46,
-                  child: DropdownButton<String>(
-                    value: _timesampleUnit,
-                    icon: Icon(Icons.arrow_drop_down),
-                    iconSize: 24,
-                    elevation: 16,
-                    style: TextStyle(color: Colors.black),
-                    underline: Container(
-                      height: 2,
-                      color: Colors.blueAccent,
+                  width: 50,
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _timesampleUnit,
+                      icon: Icon(Icons.arrow_drop_down),
+                      iconSize: 24,
+                      elevation: 16,
+                      style: TextStyle(color: Colors.black),
+                      underline: Container(
+                        height: 2,
+                        color: Colors.blueAccent,
+                      ),
+                      onChanged: (String newValue) {
+                        setState(() {
+                          _timesampleUnit = newValue;
+                        });
+                      },
+                      items: <String>['sec', 'min', 'hr']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
                     ),
-                    onChanged: (String newValue) {
-                      setState(() {
-                        _timesampleUnit = newValue;
-                      });
-                    },
-                    items: <String>['sec', 'min', 'hr']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
                   )),
             ],
           ),
@@ -1111,7 +1115,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       margin: EdgeInsets.only(bottom: 20),
       padding: EdgeInsets.all(5),
-      decoration: sliderBoxDecoration(),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -1195,7 +1198,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   style: TextStyle(fontWeight: FontWeight.bold)),
               Container(
                 padding: EdgeInsets.only(left: 7.0, right: 5.0),
-                width: 30,
+                width: 35,
                 child: TextField(
                   textAlign: TextAlign.end,
                   controller: perSecController,
@@ -1214,29 +1217,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               Container(
-                  width: 46,
-                  child: DropdownButton<String>(
-                    value: _persecUnit,
-                    icon: Icon(Icons.arrow_drop_down),
-                    iconSize: 24,
-                    elevation: 16,
-                    style: TextStyle(color: Colors.black),
-                    underline: Container(
-                      height: 2,
-                      color: Colors.blueAccent,
+                  width: 50,
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _persecUnit,
+                      icon: Icon(Icons.arrow_drop_down),
+                      iconSize: 24,
+                      elevation: 16,
+                      style: TextStyle(color: Colors.black),
+                      underline: Container(
+                        height: 2,
+                        color: Colors.blueAccent,
+                      ),
+                      onChanged: (String newValue) {
+                        setState(() {
+                          _persecUnit = newValue;
+                        });
+                      },
+                      items: <String>['sec', 'min', 'hr']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
                     ),
-                    onChanged: (String newValue) {
-                      setState(() {
-                        _persecUnit = newValue;
-                      });
-                    },
-                    items: <String>['sec', 'min', 'hr']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
                   )),
             ],
           ),
@@ -1527,6 +1532,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // Widget for dB slider
   Row dBTresholdSliderControl(double minVal, double maxVal) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         GestureDetector(
           onTap: () {

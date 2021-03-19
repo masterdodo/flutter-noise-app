@@ -52,10 +52,11 @@
     "exit_app_string": "Do you really want to exit the app?",
     "schedule_string": "Schedule",
     "pro_string": "This feature is going to be available in pro version.",
-    "algorithm_string": "Switching",
+    "algorithm_string": "Automatic sound switching",
     "one_sound_string": "At least one sound has to be enabled.",
     "hourly_string": "Hourly statistics",
     "footage_string": "Audio footage and graphs",
     "noise_info_string": "dB info:\n\n20 – Whisper\n40  - Quiet classroom\n60 – Normal conversation\n80 – Noisy city\n100 – Engine sound\n120 – Point of pain",
-    "delay_timer_string": "Delay after start:"
+    "delay_timer_string": "Delay after start:",
+    "archive_string": "Archive"
 }
