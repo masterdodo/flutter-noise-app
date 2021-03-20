@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:noise_app/app_localizations.dart';
 import 'package:noise_app/routes.dart';
 import 'package:noise_app/theme/style.dart';
-import 'package:android_alarm_manager/android_alarm_manager.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
+
   runApp(NoiseApp());
-  await AndroidAlarmManager.initialize();
 }
 
 class NoiseApp extends StatelessWidget {

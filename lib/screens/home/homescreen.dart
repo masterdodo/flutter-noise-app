@@ -4,12 +4,11 @@ import 'package:noise_meter/noise_meter.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_admob/firebase_admob.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:volume/volume.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:share/share.dart';
-import 'package:android_alarm_manager/android_alarm_manager.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 
@@ -87,21 +86,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     "audio/Snort-3.mp3": 7
   };
 
-  int recordingAlarmId = 1;
+  int _timerExpiration = 0;
 
   //ADS
   BannerAd _bannerAd;
-  static const MobileAdTargetingInfo targetInfo = MobileAdTargetingInfo();
-
-  BannerAd createBannerAd() {
-    return BannerAd(
-        adUnitId: BannerAd.testAdUnitId,
-        targetingInfo: targetInfo,
-        size: AdSize.smartBanner,
-        listener: (MobileAdEvent event) {
-          print('Banner Event: $event');
-        });
-  }
+  bool _bannerReady = false;
+  String bannerAdId = 'ca-app-pub-4998785370755707/1407813187';
 
   @override
   void initState() {
@@ -133,9 +123,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     fltrNotification.initialize(initializationSettings,
         onSelectNotification: notificationSelected);
     //Ads
-    FirebaseAdMob.instance
-        .initialize(appId: "ca-app-pub-4998785370755707~2117070259");
-    _bannerAd = createBannerAd()..load();
+    createBannerAd();
   }
 
   @override
@@ -143,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     super.dispose();
     WidgetsBinding.instance.removeObserver(this);
     audioVolumeController.dispose();
-    _bannerAd.dispose();
+    _bannerAd?.dispose();
   }
 
   @override
@@ -178,6 +166,34 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       default:
         break;
     }
+  }
+
+  void createBannerAd() {
+    _bannerAd ??= BannerAd(
+      size: AdSize.banner,
+      adUnitId: BannerAd.testAdUnitId,
+      request: AdRequest(),
+      listener: AdListener(
+        onAdLoaded: (Ad ad) {
+          print('${ad.runtimeType} loaded.');
+          _bannerReady = true;
+        },
+        onAdFailedToLoad: (Ad ad, LoadAdError error) {
+          print('${ad.runtimeType} failed to load: $error.');
+          ad.dispose();
+          _bannerReady = null;
+          createBannerAd();
+        },
+        onAdOpened: (Ad ad) => print('${ad.runtimeType} onAdOpened.'),
+        onAdClosed: (Ad ad) {
+          print('${ad.runtimeType} closed.');
+          ad.dispose();
+          createBannerAd();
+        },
+        onApplicationExit: (Ad ad) =>
+            print('${ad.runtimeType} onApplicationExit.'),
+      ),
+    )..load();
   }
 
   _setAudioVolumeValue() {
@@ -283,7 +299,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     this.setState(() {
       if (!this._isRecording) {
         _isRecording = true;
-        _isTimerRunning = false;
       }
       _dBValueRealTime = noiseReading.meanDecibel.toString();
     });
@@ -309,14 +324,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       start();
     } else {
       int x = int.parse(delayAfterStart.split(":")[0]);
-      print(x);
-      AndroidAlarmManager.cancel(recordingAlarmId);
-      AndroidAlarmManager.oneShot(
-        Duration(seconds: x),
-        recordingAlarmId,
-        fireAlarm,
-      );
+      x *= 60000;
+      _timerExpiration = DateTime.now().millisecondsSinceEpoch + x;
+      //ALARM WAS HERE
       preStartCountdown(context);
+      start();
     }
   }
 
@@ -342,7 +354,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       });
       if (delayForTimer == "00:00") {
         delayTimer?.cancel();
-        start();
       }
     });
   }
@@ -390,7 +401,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         dBValueList = new List<double>();
         _showNotification();
       });
-      delayTimer?.cancel();
       getdBData(); //Calls function to start persec timer
 
     } catch (err) {
@@ -444,15 +454,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    Timer(Duration(seconds: 3), () {
-      try {
-        if (this.mounted) {
-          _bannerAd?.show();
-        }
-      } catch (e) {
-        print("Yikes");
-      }
-    });
     return WillPopScope(
       onWillPop: () async {
         return showDialog(
@@ -613,7 +614,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ),
                   AbsorbPointer(
                       absorbing: _isRecording || _isTimerRunning,
-                      child: soundVolume(context))
+                      child: soundVolume(context)),
+                  Container(
+                      width: _bannerAd.size.width.toDouble(),
+                      height: _bannerAd.size.height.toDouble(),
+                      child: AdWidget(
+                        ad: _bannerAd,
+                      )),
                 ],
               ),
             ),
@@ -734,9 +741,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   // Processes dB values to check average volume
   void dBProcessor(text) {
-    if (duration != null &&
-        (_timeLastAudioPlayed + duration.inSeconds >
-            (new DateTime.now().millisecondsSinceEpoch / 1000).round())) {
+    if ((duration != null &&
+            (_timeLastAudioPlayed + duration.inSeconds >
+                (new DateTime.now().millisecondsSinceEpoch / 1000).round())) ||
+        _isTimerRunning) {
+      if (_isTimerRunning) {
+        if (_timerExpiration < DateTime.now().millisecondsSinceEpoch) {
+          setState(() {
+            _isTimerRunning = false;
+          });
+          delayTimer?.cancel();
+        }
+      }
     } else {
       dBProcessorAfterSound(text);
     }
@@ -765,8 +781,4 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
     }
   }
-}
-
-void fireAlarm() {
-  print('Alarm fired at ${DateTime.now()}');
 }
