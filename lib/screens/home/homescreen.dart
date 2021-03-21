@@ -89,6 +89,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   int _timerExpiration = 0;
 
+  bool _disabledStartButton = false;
+
   //ADS
   BannerAd _bannerAd;
   bool _bannerReady = false;
@@ -374,6 +376,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   //Turn MIC on
   void start() async {
+    setState(() {
+      _disabledStartButton = true;
+    });
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       _noiseSubscription = _noiseMeter.noiseStream.listen(onData);
@@ -416,10 +421,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     } catch (err) {
       print(err);
     }
+    setState(() {
+      _disabledStartButton = false;
+    });
   }
 
   //Turn MIC off
   void stop() async {
+    setState(() {
+      _disabledStartButton = true;
+    });
     try {
       if (_noiseSubscription != null) {
         _noiseSubscription.cancel(); //Cancels MIC
@@ -439,6 +450,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     } catch (err) {
       print('stopRecorder error: $err');
     }
+    setState(() {
+      _disabledStartButton = false;
+    });
   }
 
   //Play audio file
@@ -515,9 +529,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           : (_isRecording ? Colors.red : Colors.green),
                       padding: EdgeInsets.all(35),
                     ),
-                    onPressed: (_isRecording || _isTimerRunning)
-                        ? this.stop
-                        : () => this.preStart(context),
+                    onPressed: (_disabledStartButton)
+                        ? null
+                        : ((_isRecording || _isTimerRunning)
+                            ? this.stop
+                            : () => this.preStart(context)),
                     child: (_isRecording || _isTimerRunning)
                         ? Icon(
                             Icons.stop,
