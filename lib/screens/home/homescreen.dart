@@ -57,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int _timeLastAudioPlayed = 0;
   int _activeTimeoutValue;
   String delayForTimer;
+  bool wasTimerOnScreenOff = false;
 
   String _bestAudioFile;
   String delayAfterStart;
@@ -154,12 +155,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   .toString()
                   .padLeft(2, '0');
           preStartCountdown(context);
+        } else if (wasTimerOnScreenOff) {
+          setState(() {
+            delayForTimer = "00:00";
+          });
         }
         break;
       case AppLifecycleState.paused:
         dateOnTurnOff =
             (((new DateTime.now()).millisecondsSinceEpoch) / 1000).round();
         if (_isTimerRunning) {
+          wasTimerOnScreenOff = true;
           stopTheTimer();
         }
         break;
@@ -176,12 +182,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       listener: AdListener(
         onAdLoaded: (Ad ad) {
           print('${ad.runtimeType} loaded.');
-          _bannerReady = true;
+          setState(() {
+            _bannerReady = true;
+          });
         },
         onAdFailedToLoad: (Ad ad, LoadAdError error) {
           print('${ad.runtimeType} failed to load: $error.');
           ad.dispose();
-          _bannerReady = null;
+          setState(() {
+            _bannerReady = false;
+          });
           createBannerAd();
         },
         onAdOpened: (Ad ad) => print('${ad.runtimeType} onAdOpened.'),
@@ -416,7 +426,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         _noiseSubscription = null;
       }
       timer?.cancel(); //Stops timer that's adding dB values to array
-      delayTimer?.cancel();
+      delayTimer?.cancel(); //Stops the delay timer in place
       stopAudio(); //Stops audio alert if playing
       dBValueList?.clear(); //Clears/Resets array of realtime dB values
       _hideNotification(); //Clears mic on notification
@@ -424,6 +434,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         this._isRecording = false;
         this._isTimerRunning = false;
         this._timeLastAudioPlayed = 0;
+        this._timerExpiration = 0;
       });
     } catch (err) {
       print('stopRecorder error: $err');
@@ -499,11 +510,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       shape: CircleBorder(),
-                      primary: _isRecording
-                          ? Colors.red
-                          : (_isTimerRunning
-                              ? Colors.deepPurple[800]
-                              : Colors.green),
+                      primary: _isTimerRunning
+                          ? Colors.deepPurple[800]
+                          : (_isRecording ? Colors.red : Colors.green),
                       padding: EdgeInsets.all(35),
                     ),
                     onPressed: (_isRecording || _isTimerRunning)
@@ -615,12 +624,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   AbsorbPointer(
                       absorbing: _isRecording || _isTimerRunning,
                       child: soundVolume(context)),
-                  Container(
-                      width: _bannerAd.size.width.toDouble(),
-                      height: _bannerAd.size.height.toDouble(),
-                      child: AdWidget(
-                        ad: _bannerAd,
-                      )),
+                  ((_bannerReady)
+                      ? Container(
+                          width: _bannerAd.size.width.toDouble(),
+                          height: _bannerAd.size.height.toDouble(),
+                          child: AdWidget(
+                            ad: _bannerAd,
+                          ))
+                      : Text("")),
                 ],
               ),
             ),
@@ -649,7 +660,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
               Container(
                 padding: EdgeInsets.only(left: 6.0),
-                width: 32,
+                width: 40,
                 child: TextField(
                   textAlign: TextAlign.end,
                   controller: audioVolumeController,
@@ -742,17 +753,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // Processes dB values to check average volume
   void dBProcessor(text) {
     if ((duration != null &&
-            (_timeLastAudioPlayed + duration.inSeconds >
-                (new DateTime.now().millisecondsSinceEpoch / 1000).round())) ||
-        _isTimerRunning) {
-      if (_isTimerRunning) {
-        if (_timerExpiration < DateTime.now().millisecondsSinceEpoch) {
-          setState(() {
-            _isTimerRunning = false;
-          });
-          delayTimer?.cancel();
-        }
-      }
+        (_timeLastAudioPlayed + duration.inSeconds >
+            (new DateTime.now().millisecondsSinceEpoch / 1000).round()))) {
     } else {
       dBProcessorAfterSound(text);
     }
@@ -774,10 +776,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       int x = ((new DateTime.now()).millisecondsSinceEpoch / 1000).round();
       if (avg > _activeDbValue &&
           x > _timeLastAudioPlayed + _activeTimeoutValue) {
-        playAudio();
-        _timeLastAudioPlayed =
-            ((new DateTime.now()).millisecondsSinceEpoch / 1000).round();
-        dBValueList.clear();
+        if (_isTimerRunning) {
+          if (_isTimerRunning &&
+              _timerExpiration < DateTime.now().millisecondsSinceEpoch) {
+            setState(() {
+              _isTimerRunning = false;
+            });
+            delayTimer?.cancel();
+          }
+        } else {
+          playAudio();
+          _timeLastAudioPlayed =
+              ((new DateTime.now()).millisecondsSinceEpoch / 1000).round();
+          dBValueList.clear();
+        }
       }
     }
   }

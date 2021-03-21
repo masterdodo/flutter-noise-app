@@ -916,7 +916,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   style: TextStyle(fontWeight: FontWeight.bold)),
               Container(
                 padding: EdgeInsets.only(left: 7.0),
-                width: 32,
+                width: 40,
                 child: TextField(
                   textAlign: TextAlign.end,
                   controller: audioVolumeController,
